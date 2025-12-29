@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Module 02: Overview</title>
+    <style>
+        @font-face {
+            font-family: 'icomoon';
+            src: url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.eot');
+            src: url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.eot#iefix-8k8p81') format('embedded-opentype'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.ttf') format('truetype'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.woff') format('woff'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.svg#icomoon') format('svg');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/reset.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/fonts/fontawesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/highlight/styles/monokai-sublime.min.css">
+	<link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/main.css?v1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">    
+    <meta charset="utf-8">
+
+</head>
+<body class="index-page">
+     <div id="modal-screen">
+        <div id="contents-wrapper">
+            <div class="toc">
+<ul>
+<li><a href="#module-02-real-world-cart-based-recommender-system">Module 02 – Real-World Cart-Based Recommender System</a><ul>
+<li><a href="#business-context">Business Context</a></li>
+<li><a href="#project-objectives">Project Objectives</a></li>
+<li><a href="#what-you-will-learn">What You Will Learn</a></li>
+</ul>
+</li>
+<li><a href="#phase-1-baseline-model-conditional-probability">Phase 1 – Baseline Model: Conditional Probability</a><ul>
+<li><a href="#business-question">Business Question</a></li>
+<li><a href="#task">Task</a></li>
+<li><a href="#requirements">Requirements</a></li>
+<li><a href="#evaluation-metric">Evaluation Metric</a></li>
+<li><a href="#deliverables">Deliverables</a></li>
+</ul>
+</li>
+<li><a href="#phase-2-changing-customer-behavior-over-time">Phase 2 – Changing Customer Behavior Over Time</a><ul>
+<li><a href="#business-question_1">Business Question</a></li>
+<li><a href="#task_1">Task</a></li>
+<li><a href="#deliverables_1">Deliverables</a></li>
+</ul>
+</li>
+<li><a href="#phase-3-retraining-the-model">Phase 3 – Retraining the Model</a><ul>
+<li><a href="#business-question_2">Business Question</a></li>
+<li><a href="#task_2">Task</a></li>
+<li><a href="#deliverables_2">Deliverables</a></li>
+</ul>
+</li>
+<li><a href="#phase-4-more-data-and-the-cold-start-problem">Phase 4 – More Data and the Cold-Start Problem</a><ul>
+<li><a href="#business-question_3">Business Question</a></li>
+<li><a href="#task_3">Task</a></li>
+<li><a href="#deliverables_3">Deliverables</a></li>
+</ul>
+</li>
+<li><a href="#phase-5-deploying-the-recommender-as-an-api">Phase 5 – Deploying the Recommender as an API</a><ul>
+<li><a href="#business-question_4">Business Question</a></li>
+<li><a href="#task_4">Task</a></li>
+<li><a href="#requirements_1">Requirements</a></li>
+<li><a href="#deliverables_4">Deliverables</a></li>
+</ul>
+</li>
+<li><a href="#phase-6-separating-modeling-logic-from-business-rules">Phase 6 – Separating Modeling Logic from Business Rules</a><ul>
+<li><a href="#business-question_5">Business Question</a></li>
+<li><a href="#task_5">Task</a></li>
+<li><a href="#deliverables_5">Deliverables</a></li>
+</ul>
+</li>
+<li><a href="#phase-7-automating-training-and-filtering">Phase 7 – Automating Training and Filtering</a><ul>
+<li><a href="#business-question_6">Business Question</a></li>
+<li><a href="#task_6">Task</a></li>
+<li><a href="#deliverables_6">Deliverables</a></li>
+<li><a href="#final-outcome">Final Outcome</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+            <a href="#" id="hide-contents" title="Close Table of Contents"><i class="far fa-window-close"></i></a>
+        </div>
+    </div>
+	<header>
+        <span class="icon-byui-logo"></span>
+        <div id="titles">
+            <h1>CSE 455 - Developing AI Systems</h1>
+            <h2>Module 02: Overview</h2>
+            <nav><a href="https://byui-cse.github.io/cse455-course"><i class="fas fa-home"></i></a><a href="https://byui-cse.github.io/cse455-course/module-01/">Module 1</a><a href="https://byui-cse.github.io/cse455-course/module-02/">Module 2</a><a href="https://byui-cse.github.io/cse455-course/module-03/">Module 3 - 6</a><a href="https://byui-cse.github.io/cse455-course/presentation/">Final Presentations</a></nav>
+        </div>
+        <a href="#" id="show-contents" title="Show Table of Contents"><i class="far fa-list-alt"></i></a>
+    </header>
+	<article>
+		<!-- ![Monolithic App](https://byui-cse.github.io/cse455-course/shared/img/technology-product-development-sprint2.jpg)
+*[Photo by Dall-E-3](https://openai.com/dall-e-3)*
+
+## Module 02 - Real-World Cart-Based Recommender System
+
+**Focus Areas:** Sequential recommendation, temporal modeling, cold start, product lifecycle, business constraints
+
+In this project, you will build a production-style recommender system that suggests products to add to a shopping cart based on items already present. You will work with multi-year real retail transaction data in which:
+
+* new products enter the catalog over time
+* products are discontinued
+* seasonal items surge and decline
+* products are temporarily sold-out and unavailable
+* customer behavior shifts from year to year
+
+Your task is to:
+    * Design an end-to-end recommendation system
+    * Handle changing product catalogs (additions and discontinuations)
+    * Never recommend a discontinued item
+    * Build and test mupltiple recommendation models
+    * Identify a retraining schedule
+    * Improve recommendations over time
+    * Deploy the recommendation system online
+    * Provide recommendations in less than 500 milliseconds
+
+By completing this project you will learn how to:
+
+* Build recommendation models using real-world patterns
+* Avoid future data leakage using time-based splits
+* Handle cold-start products with limited history
+* Prevent discontinued and out-of-stock items from being recommended
+* Detect and account for seasonality
+* Evaluate models using cart-completion metrics
+* Design serving-layer logic separate from modeling logic
+* Produce business-oriented analysis and design decisions
+
+## Phase 1 Baseline Model Conditional Probability
+
+Build a simple product recommender:
+
+Given items A,B,C in a cart
+
+Recommend items most frequently co-purchased with A,B,C
+
+Requirements
+
+Use *cart_export_11-15* which includes data from 2011 through 2015
+
+Test on January
+
+Evaluation Metric
+
+HitRate@10
+
+Deliverables
+Metrics for January
+
+Filter training data to only use 2015 and test on January again.
+
+What where your results?
+How did they change when you used less data?
+Why did they change? Explain.
+
+## Phase 2 - Examine changes in customer purchaing patterns over time
+
+Use your best model to make predictions on the answers_2016_12.csv 
+
+This is data from December of 2016. Throughout 2016 there were 2 discontinued items and 37 new items added to site.
+What were your results?
+How did they change from the January 2016 test?
+Why did they change?
+What could be the causes? Explain. 
+What would happen as time continues?
+
+## Phase 3 - Retraining
+
+Retrain your model on the data cart_export_2016_11.csv
+Does this take care of the causes you identified above? What else do you need to improve your recommender?
+
+## Phase 4 - More data and Cold Start Problem
+
+2017 - 32 new items added:
+1 - January
+7 - February
+3 - May
+1 - June
+14 - August
+6 - October
+
+4 Items discontinued 
+2 - May
+1 - July
+1 - October
+
+How often should we be retraining?
+How do we deal with recommending new items? If they've never been sold before, our recommender won't ever recommend them and they'll be less likely to be purchased. This is a cold item start problem.
+
+## Phase 5 - Deploying to an API
+
+* Pickle
+* Docker
+* Deploy
+
+## Phase 6 - Separating Filter Logic and Modeling Logic
+
+* Out of Stock Items
+* Discontinued Items
+* Holiday Specials
+* Cold Starts and Promotional Items
+
+## Phase 7 - Automating training and filtering -->
+
+<h2 id="module-02-real-world-cart-based-recommender-system">Module 02 – Real-World Cart-Based Recommender System</h2>
+<p><strong>Focus Areas:</strong>
+Sequential recommendation, temporal modeling, cold start, product lifecycle, retraining strategy, business constraints, production deployment</p>
+<hr />
+<h3 id="business-context">Business Context</h3>
+<p>Modern e-commerce recommendation systems do <strong>not</strong> operate in static environments. Over time:</p>
+<ul>
+<li>New products are introduced</li>
+<li>Old products are discontinued</li>
+<li>Some products temporarily go out of stock</li>
+<li>Customer behavior evolves due to trends, seasonality, and promotions</li>
+</ul>
+<p>The business expectation is simple but demanding:</p>
+<blockquote>
+<p>“When a customer adds items to their cart, recommend additional products they are likely to purchase — quickly, accurately, and without violating business constraints.”</p>
+</blockquote>
+<p>Behind that expectation lies a complex engineering and modeling problem.</p>
+<p>In this module, you will build a <strong>production-style cart-based recommender system</strong> using multi-year retail transaction data. The goal is not just accuracy, but <strong>robustness over time</strong> and <strong>deployability in a real system</strong>.</p>
+<hr />
+<h3 id="project-objectives">Project Objectives</h3>
+<p>Your recommender system must:</p>
+<ul>
+<li>Suggest products based on items already in a cart</li>
+<li>Handle <strong>changing product catalogs</strong></li>
+<li><strong>Never</strong> recommend discontinued items</li>
+<li>Avoid recommending <strong>out-of-stock items</strong></li>
+<li>Adapt to <strong>new customer behavior over time</strong></li>
+<li>Support <strong>cold-start products</strong></li>
+<li>Serve recommendations in <strong>under 500 milliseconds</strong></li>
+<li>Be deployable as an <strong>online API</strong></li>
+</ul>
+<hr />
+<h3 id="what-you-will-learn">What You Will Learn</h3>
+<p>By completing this project, you will learn how to:</p>
+<ul>
+<li>Build cart-based recommendation models using real transaction data</li>
+<li>Use <strong>time-based splits</strong> to prevent future data leakage</li>
+<li>Measure performance with business-relevant metrics</li>
+<li>Understand how recommendation quality degrades over time</li>
+<li>Identify when and why <strong>retraining</strong> is necessary</li>
+<li>Handle cold-start products in production systems</li>
+<li>Separate <strong>modeling logic</strong> from <strong>business rules</strong></li>
+<li>Design a recommender system as an <strong>end-to-end service</strong>, not just a model</li>
+</ul>
+<hr />
+<h2 id="phase-1-baseline-model-conditional-probability">Phase 1 – Baseline Model: Conditional Probability</h2>
+<h3 id="business-question">Business Question</h3>
+<blockquote>
+<p>“If customers frequently buy certain items together, can we use that information to recommend products?”</p>
+</blockquote>
+<p>This phase establishes a <strong>baseline</strong> recommender that the business can understand and trust.</p>
+<hr />
+<h3 id="task">Task</h3>
+<p>Build a simple recommender based on <strong>co-purchase frequency</strong>:</p>
+<p>Given items <strong>A, B, C</strong> in a cart, recommend items that are most frequently purchased together with those items.</p>
+<hr />
+<h3 id="requirements">Requirements</h3>
+<ul>
+<li>Use <code>cart_export_11-15.csv</code> (data from 2011–2015)</li>
+<li>Train on historical carts</li>
+<li>Test on <strong>January data</strong></li>
+<li>Recommend <strong>Top-10 items</strong></li>
+</ul>
+<hr />
+<h3 id="evaluation-metric">Evaluation Metric</h3>
+<ul>
+<li>
+<p><strong>HitRate@10</strong></p>
+</li>
+<li>
+<p>Did the true purchased item appear in the top 10 recommendations?</p>
+</li>
+</ul>
+<hr />
+<h3 id="deliverables">Deliverables</h3>
+<ol>
+<li>Description of your baseline algorithm</li>
+<li>January HitRate@10 using all available training data</li>
+<li>January HitRate@10 when training <strong>only on 2015 data</strong></li>
+<li>
+<p>Written analysis answering:</p>
+</li>
+<li>
+<p>How did performance change?</p>
+</li>
+<li>Why did using less data affect results?</li>
+<li>What trade-offs does the business face when limiting training data?</li>
+</ol>
+<hr />
+<h2 id="phase-2-changing-customer-behavior-over-time">Phase 2 – Changing Customer Behavior Over Time</h2>
+<h3 id="business-question_1">Business Question</h3>
+<blockquote>
+<p>“If we build a recommender today, how long will it stay accurate?”</p>
+</blockquote>
+<p>Customer behavior is <strong>not stationary</strong>. Products change, preferences shift, and recommendations can silently degrade.</p>
+<hr />
+<h3 id="task_1">Task</h3>
+<ul>
+<li>Use your best Phase 1 model</li>
+<li>Evaluate it on <code>answers_2016_12.csv</code> (December 2016)</li>
+<li>
+<p>During 2016:</p>
+</li>
+<li>
+<p>2 items were discontinued</p>
+</li>
+<li>37 new items were introduced</li>
+</ul>
+<hr />
+<h3 id="deliverables_1">Deliverables</h3>
+<ol>
+<li>Performance metrics on December 2016</li>
+<li>Comparison to January 2016 results</li>
+<li>
+<p>Written analysis addressing:</p>
+</li>
+<li>
+<p>How did performance change?</p>
+</li>
+<li>Why did it change?</li>
+<li>What role did new and discontinued products play?</li>
+<li>What would happen if the model were <strong>never retrained</strong>?</li>
+</ol>
+<hr />
+<h2 id="phase-3-retraining-the-model">Phase 3 – Retraining the Model</h2>
+<h3 id="business-question_2">Business Question</h3>
+<blockquote>
+<p>“Can retraining fix performance degradation?”</p>
+</blockquote>
+<p>Retraining costs time, money, and engineering effort. The business wants to know <strong>when retraining helps — and when it doesn’t</strong>.</p>
+<hr />
+<h3 id="task_2">Task</h3>
+<ul>
+<li>Retrain your model using <code>cart_export_2016_11.csv</code></li>
+<li>Re-evaluate on December 2016</li>
+</ul>
+<hr />
+<h3 id="deliverables_2">Deliverables</h3>
+<ol>
+<li>Updated performance metrics</li>
+<li>Comparison before and after retraining</li>
+<li>
+<p>Written analysis:</p>
+</li>
+<li>
+<p>Did retraining fix the issues identified in Phase 2?</p>
+</li>
+<li>What problems remain?</li>
+<li>What types of issues <strong>cannot</strong> be solved by retraining alone?</li>
+</ol>
+<hr />
+<h2 id="phase-4-more-data-and-the-cold-start-problem">Phase 4 – More Data and the Cold-Start Problem</h2>
+<h3 id="business-question_3">Business Question</h3>
+<blockquote>
+<p>“How do we recommend products that have never been sold before?”</p>
+</blockquote>
+<p>In 2017:</p>
+<ul>
+<li><strong>32 new products</strong> were introduced throughout the year</li>
+<li><strong>4 products</strong> were discontinued</li>
+</ul>
+<p>New products create a <strong>cold-start problem</strong>:
+If an item has no purchase history, your recommender will never recommend it — which guarantees it will never get purchased.</p>
+<hr />
+<h3 id="task_3">Task</h3>
+<p>Analyze the implications of catalog churn and answer the following:</p>
+<hr />
+<h3 id="deliverables_3">Deliverables</h3>
+<ol>
+<li>
+<p>Proposal for a <strong>retraining schedule</strong></p>
+</li>
+<li>
+<p>How often should retraining occur?</p>
+</li>
+<li>What signals would trigger retraining?</li>
+<li>
+<p>Strategies for handling cold-start products, such as:</p>
+</li>
+<li>
+<p>Popularity-based injection</p>
+</li>
+<li>Promotional overrides</li>
+<li>Randomized exploration</li>
+<li>
+<p>Written justification connecting your strategy to:</p>
+</li>
+<li>
+<p>Business goals</p>
+</li>
+<li>Customer experience</li>
+<li>Long-term data collection</li>
+</ol>
+<hr />
+<h2 id="phase-5-deploying-the-recommender-as-an-api">Phase 5 – Deploying the Recommender as an API</h2>
+<h3 id="business-question_4">Business Question</h3>
+<blockquote>
+<p>“How does this model actually get used by the website?”</p>
+</blockquote>
+<p>Models are useless unless they can be <strong>served reliably</strong>.</p>
+<hr />
+<h3 id="task_4">Task</h3>
+<p>Deploy your recommender as a production-style API.</p>
+<hr />
+<h3 id="requirements_1">Requirements</h3>
+<ul>
+<li>Serialize model artifacts using <strong>Pickle</strong></li>
+<li>Package the system using <strong>Docker</strong></li>
+<li>Serve recommendations via an HTTP endpoint</li>
+<li>Respond in under <strong>500 ms</strong></li>
+</ul>
+<hr />
+<h3 id="deliverables_4">Deliverables</h3>
+<ol>
+<li>Dockerfile</li>
+<li>Running API endpoint</li>
+<li>Example request/response</li>
+<li>Short explanation of deployment choices</li>
+</ol>
+<hr />
+<h2 id="phase-6-separating-modeling-logic-from-business-rules">Phase 6 – Separating Modeling Logic from Business Rules</h2>
+<h3 id="business-question_5">Business Question</h3>
+<blockquote>
+<p>“Why is the model recommending items we can’t sell?”</p>
+</blockquote>
+<p>Not all recommendation logic belongs in the model.</p>
+<hr />
+<h3 id="task_5">Task</h3>
+<p>Separate <strong>model predictions</strong> from <strong>business constraints</strong>, including:</p>
+<ul>
+<li>Discontinued items</li>
+<li>Out-of-stock items</li>
+<li>Holiday or promotional items</li>
+<li>Cold-start product promotion</li>
+</ul>
+<hr />
+<h3 id="deliverables_5">Deliverables</h3>
+<ol>
+<li>Diagram or explanation of your system architecture</li>
+<li>
+<p>Description of:</p>
+</li>
+<li>
+<p>What logic belongs in the model</p>
+</li>
+<li>What logic belongs in the serving layer</li>
+<li>Example showing how business rules override model output</li>
+</ol>
+<hr />
+<h2 id="phase-7-automating-training-and-filtering">Phase 7 – Automating Training and Filtering</h2>
+<h3 id="business-question_6">Business Question</h3>
+<blockquote>
+<p>“Can this system run without constant human intervention?”</p>
+</blockquote>
+<hr />
+<h3 id="task_6">Task</h3>
+<p>Design an automation strategy for:</p>
+<ul>
+<li>Periodic retraining</li>
+<li>Updating discontinued and out-of-stock lists</li>
+<li>Safely deploying updated models</li>
+</ul>
+<hr />
+<h3 id="deliverables_6">Deliverables</h3>
+<ol>
+<li>Proposed automation pipeline</li>
+<li>
+<p>Explanation of:</p>
+</li>
+<li>
+<p>What runs nightly</p>
+</li>
+<li>What runs weekly or monthly</li>
+<li>What requires human approval</li>
+<li>Risks and failure modes to monitor</li>
+</ol>
+<hr />
+<h3 id="final-outcome">Final Outcome</h3>
+<p>By the end of this module, you will have built <strong>not just a recommender model</strong>, but a <strong>real recommendation system</strong> — one that reflects how production systems are designed, evaluated, deployed, and maintained in industry.</p>
+	</article>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/highlight/highlight.pack.js"></script>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.js"></script>
+    <script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/contrib/auto-render.min.js"></script>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/smartquotes/smartquotes.min.js"></script>
+    <script>
+
+        /* Startup scripts for katex rendering */
+    	renderMathInElement(document.body,
+		{
+			delimiters: [
+				{left: "$$", right: "$$", display: true},
+				{left: "$", right: "$", display: false},
+			]
+    	});
+
+        /* Highlighting code */
+    	hljs.initHighlightingOnLoad();
+    	var elements = document.querySelectorAll('.language-text')
+		for (var i = 0; i < elements.length; i++) {
+  			elements[i].classList.add('hljs');
+		}
+
+        /* TOC support */
+        var hideContents = function(e){
+            console.log(e.target);
+            if(e.target.id === 'modal-screen' || e.target.nodeName.toLowerCase() === 'i') {
+                e.preventDefault();
+                document.querySelector('#contents-wrapper').classList.remove('active');
+                document.querySelector('#modal-screen').classList.remove('active');
+            }
+        }
+
+        var showContents = function(e){
+            e.preventDefault();
+            document.querySelector('#contents-wrapper').classList.add('active');
+            document.querySelector('#modal-screen').classList.add('active');
+        }
+
+        document.querySelector("#hide-contents").addEventListener('click', hideContents);
+        document.querySelector("#modal-screen").addEventListener('click', hideContents);
+        document.querySelector("#show-contents").addEventListener('click', showContents);
+    	
+    </script>
+</body>
+</html>

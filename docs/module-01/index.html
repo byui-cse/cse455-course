@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Module 01: Overview</title>
+    <style>
+        @font-face {
+            font-family: 'icomoon';
+            src: url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.eot');
+            src: url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.eot#iefix-8k8p81') format('embedded-opentype'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.ttf') format('truetype'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.woff') format('woff'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.svg#icomoon') format('svg');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/reset.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/fonts/fontawesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/highlight/styles/monokai-sublime.min.css">
+	<link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/main.css?v1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">    
+    <meta charset="utf-8">
+
+</head>
+<body class="index-page">
+     <div id="modal-screen">
+        <div id="contents-wrapper">
+            <div class="toc">
+<ul>
+<li><a href="#introductory-project-skittles-and-mms">Introductory Project - Skittles and M&amp;Ms</a></li>
+</ul>
+</div>
+
+            <a href="#" id="hide-contents" title="Close Table of Contents"><i class="far fa-window-close"></i></a>
+        </div>
+    </div>
+	<header>
+        <span class="icon-byui-logo"></span>
+        <div id="titles">
+            <h1>CSE 455 - Developing AI Systems</h1>
+            <h2>Module 01: Overview</h2>
+            <nav><a href="https://byui-cse.github.io/cse455-course"><i class="fas fa-home"></i></a><a href="https://byui-cse.github.io/cse455-course/module-01/">Module 1</a><a href="https://byui-cse.github.io/cse455-course/module-02/">Module 2</a><a href="https://byui-cse.github.io/cse455-course/module-03/">Module 3 - 6</a><a href="https://byui-cse.github.io/cse455-course/presentation/">Final Presentations</a></nav>
+        </div>
+        <a href="#" id="show-contents" title="Show Table of Contents"><i class="far fa-list-alt"></i></a>
+    </header>
+	<article>
+		<!-- ![Sprint](https://byui-cse.github.io/cse455-course/shared/img/sprint_full.png)
+*[Photo by The Sprint Book](https://www.thesprintbook.com/the-design-sprint)* -->
+
+<h2 id="introductory-project-skittles-and-mms">Introductory Project - Skittles and M&amp;Ms</h2>
+<p>In this project, students will design and build an end-to-end AI system modeled after real industrial production lines. The scenario is simple on the surface—M&amp;Ms and Skittles move down a conveyor belt, and the system must detect, classify, and count them—but it mirrors the exact challenges faced by modern manufacturing, food processing, and logistics companies. Similar systems exist today in potato processing plants, bakery packaging lines, automotive assembly, and quality-control facilities around the world. Your goal is to turn raw visual data into automated decision-making that operates reliably and in real time.</p>
+<p>Students will label image data, train a computer vision model, export the model to a usable format, and deploy it inside a program that runs continuously as candy passes a fixed camera point. The system should count each candy accurately and produce running totals, reflecting how many M&amp;Ms and how many Skittles have passed. Along the way, students will confront the full AI lifecycle: dataset creation, model training and experimentation, pipeline design, performance tradeoffs, and system integration.</p>
+<p>Once the first version is working, the focus will shift to evaluation. Students will measure how often the system gets it right, how quickly it can process frames, and how it behaves under real-time constraints. They will identify bottlenecks, design improvements, and implement iterations—just as real ML engineers do when models move from a research environment to production.</p>
+<p>The deeper purpose is to bridge the gap between theory and practice. Students won’t just “train a model”; they will build a functioning product that solves a defined problem in a defined environment. By the end, they should understand not just how AI works, but how AI systems are built, deployed, maintained, and improved.</p>
+<div class="admonition warning">
+<p class="admonition-title">Subject to Change</p>
+<p>Keep in mind that your instructor may deviate somewhat from the following guide, and they have final say on assignment requirements, delivery methods, and due dates. So be sure to pay attention to both in-class and Canvas announcements.</p>
+</div>
+	</article>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/highlight/highlight.pack.js"></script>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.js"></script>
+    <script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/contrib/auto-render.min.js"></script>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/smartquotes/smartquotes.min.js"></script>
+    <script>
+
+        /* Startup scripts for katex rendering */
+    	renderMathInElement(document.body,
+		{
+			delimiters: [
+				{left: "$$", right: "$$", display: true},
+				{left: "$", right: "$", display: false},
+			]
+    	});
+
+        /* Highlighting code */
+    	hljs.initHighlightingOnLoad();
+    	var elements = document.querySelectorAll('.language-text')
+		for (var i = 0; i < elements.length; i++) {
+  			elements[i].classList.add('hljs');
+		}
+
+        /* TOC support */
+        var hideContents = function(e){
+            console.log(e.target);
+            if(e.target.id === 'modal-screen' || e.target.nodeName.toLowerCase() === 'i') {
+                e.preventDefault();
+                document.querySelector('#contents-wrapper').classList.remove('active');
+                document.querySelector('#modal-screen').classList.remove('active');
+            }
+        }
+
+        var showContents = function(e){
+            e.preventDefault();
+            document.querySelector('#contents-wrapper').classList.add('active');
+            document.querySelector('#modal-screen').classList.add('active');
+        }
+
+        document.querySelector("#hide-contents").addEventListener('click', hideContents);
+        document.querySelector("#modal-screen").addEventListener('click', hideContents);
+        document.querySelector("#show-contents").addEventListener('click', showContents);
+    	
+    </script>
+</body>
+</html>
