@@ -524,6 +524,10 @@ article .dialogue blockquote em{
   z-index: 5000;
   border-radius: 5px;
   min-width: 300px;
+  max-height: 90vh;       /* Keeps the modal within 90% of the screen height */
+    overflow-y: auto;     /* Adds a scrollbar if the content is too tall */
+    width: 90%;            /* Optional: prevents it from hitting the side edges */
+    max-width: 600px;  
 }
 
 #show-contents {

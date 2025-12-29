@@ -149,7 +149,7 @@ Your recommender system must:
 * Suggest products based on items already in a cart
 * Handle **changing product catalogs**
 * **Never** recommend discontinued items
-* Avoid recommending **out-of-stock items**
+* **Never** recommend **out-of-stock items**
 * Adapt to **new customer behavior over time**
 * Support **cold-start products**
 * Serve recommendations in **under 500 milliseconds**
@@ -162,9 +162,8 @@ Your recommender system must:
 By completing this project, you will learn how to:
 
 * Build cart-based recommendation models using real transaction data
-* Use **time-based splits** to prevent future data leakage
 * Measure performance with business-relevant metrics
-* Understand how recommendation quality degrades over time
+* Understand how recommendation quality degrades over time without retraining
 * Identify when and why **retraining** is necessary
 * Handle cold-start products in production systems
 * Separate **modeling logic** from **business rules**
@@ -176,9 +175,7 @@ By completing this project, you will learn how to:
 
 ### Business Question
 
-> “If customers frequently buy certain items together, can we use that information to recommend products?”
-
-This phase establishes a **baseline** recommender that the business can understand and trust.
+> “We know customers often buy certain products together. Can we use our historical sales data to suggest the next most likely item and increase average order value?”
 
 ---
 
@@ -192,9 +189,9 @@ Given items **A, B, C** in a cart, recommend items that are most frequently purc
 
 ### Requirements
 
-* Use `cart_export_11-15.csv` (data from 2011–2015)
+* Use [cart_export_11-15.csv](../course/data/cart/cart_export_11-15.csv) (data from 2011–2015)
 * Train on historical carts
-* Test on **January data**
+* Test on [January Data from answer_2016-01.csv](../course/data/cart/answer_2016-01.csv)
 * Recommend **Top-10 items**
 
 ---
@@ -202,21 +199,19 @@ Given items **A, B, C** in a cart, recommend items that are most frequently purc
 ### Evaluation Metric
 
 * **HitRate@10**
-
-  * Did the true purchased item appear in the top 10 recommendations?
+    * Did the true purchased item appear in the top 10 recommendations?
 
 ---
 
-### Deliverables
+### Deliverables (Add to your Executive Summary)
 
 1. Description of your baseline algorithm
 2. January HitRate@10 using all available training data
 3. January HitRate@10 when training **only on 2015 data**
 4. Written analysis answering:
-
-   * How did performance change?
-   * Why did using less data affect results?
-   * What trade-offs does the business face when limiting training data?
+    * How did performance change?
+    * Why did using less data affect results?
+    * What trade-offs does the business face when limiting training data?
 
 ---
 
@@ -233,24 +228,24 @@ Customer behavior is **not stationary**. Products change, preferences shift, and
 ### Task
 
 * Use your best Phase 1 model
-* Evaluate it on `answers_2016_12.csv` (December 2016)
-* During 2016:
+* Evaluate it on [December Data from answer_2016-01.csv](../course/data/cart/answer_2016-12.csv)
 
-  * 2 items were discontinued
-  * 37 new items were introduced
+	!!! note "2016 Information"
+
+        * 2 items were discontinued
+        * 37 new items were introduced
 
 ---
 
-### Deliverables
+### Deliverables (Add to your Executive Summary)
 
 1. Performance metrics on December 2016
 2. Comparison to January 2016 results
 3. Written analysis addressing:
-
-   * How did performance change?
-   * Why did it change?
-   * What role did new and discontinued products play?
-   * What would happen if the model were **never retrained**?
+    * How did performance change?
+    * Why did it change?
+    * What role did new and discontinued products play?
+    * What would happen if the model were **never retrained**?
 
 ---
 
@@ -266,65 +261,24 @@ Retraining costs time, money, and engineering effort. The business wants to know
 
 ### Task
 
-* Retrain your model using `cart_export_2016_11.csv`
-* Re-evaluate on December 2016
+* Retrain your model using [cart_export_16_11.csv](../course/data/cart/cart_export_16_11.csv)
+* Re-evaluate it on [December Data from answer_2016-01.csv](../course/data/cart/answer_2016-12.csv)
 
 ---
 
-### Deliverables
+### Deliverables (Add to your Executive Summary)
 
 1. Updated performance metrics
 2. Comparison before and after retraining
 3. Written analysis:
-
-   * Did retraining fix the issues identified in Phase 2?
-   * What problems remain?
-   * What types of issues **cannot** be solved by retraining alone?
-
----
-
-## Phase 4 – More Data and the Cold-Start Problem
-
-### Business Question
-
-> “How do we recommend products that have never been sold before?”
-
-In 2017:
-
-* **32 new products** were introduced throughout the year
-* **4 products** were discontinued
-
-New products create a **cold-start problem**:
-If an item has no purchase history, your recommender will never recommend it — which guarantees it will never get purchased.
+    * Did retraining fix the issues identified in Phase 2?
+    * What problems remain?
+    * What types of issues **cannot** be solved by retraining alone?
 
 ---
 
-### Task
 
-Analyze the implications of catalog churn and answer the following:
-
----
-
-### Deliverables
-
-1. Proposal for a **retraining schedule**
-
-   * How often should retraining occur?
-   * What signals would trigger retraining?
-2. Strategies for handling cold-start products, such as:
-
-   * Popularity-based injection
-   * Promotional overrides
-   * Randomized exploration
-3. Written justification connecting your strategy to:
-
-   * Business goals
-   * Customer experience
-   * Long-term data collection
-
----
-
-## Phase 5 – Deploying the Recommender as an API
+## Phase 4 – Deploying the Recommender as an API
 
 ### Business Question
 
@@ -351,12 +305,62 @@ Deploy your recommender as a production-style API.
 
 ### Deliverables
 
-1. Dockerfile
-2. Running API endpoint
-3. Example request/response
-4. Short explanation of deployment choices
+1. Running API endpoint
+2. Example request/response
+3. Short explanation of deployment choices
 
 ---
+
+## Phase 5 – More Data and the Cold-Start Problem
+
+### Business Question
+
+> “How do we recommend products that have never been sold before?”
+
+In 2017:
+
+* **32 new products** were introduced throughout the year
+* **4 products** were discontinued
+
+New products create a **cold-start problem** where new users or items in the system lack sufficient interaction data to make reliable recommendations
+
+If an item has no purchase history, your recommender will never recommend it — which biases our recommender to only items that have sales history. In 2016 the number of items available for sale increased 13.7%, and in 2017 it increased another 7%. 
+
+How do we recommend products that are new or have limited sales?
+
+
+!!! note "Problems with Cold Starts and Popularity"
+
+    One of the primary issues is data sparsity; even with large datasets, the user-item interactions are often too few, leading to challenges in generating accurate recommendations. Another critical hurdle is the cold-start problem, where new users or items in the system lack sufficient interaction data to make reliable recommendations. Furthermore, general bias issues, such as user or item biases, can skew the recommendations towards certain products or users, thereby limiting the diversity of recommendations
+
+    Among these challenges, the issue of popularity bias is particularly detrimental. This bias causes recommender systems to disproportionately favor popular items, resulting in a narrow concentration of recommendations. Such a trend not only undermines the visibility of less popular or new items but also stifles diversity and novelty in the recommendations. [See EquiRate: balanced rating injection approach for popularity bias mitigation in recommender systems](https://peerj.com/articles/cs-3055/){:target="_blank"}
+
+---
+
+### Task
+
+* Retrain your model using [cart_export_17_10.csv](../course/data/cart/cart_export_17_10.csv)
+* Re-evaluate it on [November Data from answer_2017-11.csv](../course/data/cart/answer_2017-11.csv)
+
+Analyze the implications of catalog churn and answer the following:
+
+---
+
+### Deliverables
+
+1. Proposal for a **retraining schedule**
+    * How often should retraining occur?
+    * What signals would trigger retraining?
+2. Strategies for handling cold-start products, such as:
+    * Promotional overrides
+    * Randomized exploration
+3. Written justification connecting your strategy to:
+    * Business goals
+    * Customer experience
+    * Long-term data collection
+
+---
+
 
 ## Phase 6 – Separating Modeling Logic from Business Rules
 
@@ -383,9 +387,8 @@ Separate **model predictions** from **business constraints**, including:
 
 1. Diagram or explanation of your system architecture
 2. Description of:
-
-   * What logic belongs in the model
-   * What logic belongs in the serving layer
+    * What logic belongs in the model
+    * What logic belongs in the serving layer
 3. Example showing how business rules override model output
 
 ---
@@ -410,13 +413,12 @@ Design an automation strategy for:
 
 ### Deliverables
 
-1. Proposed automation pipeline
-2. Explanation of:
-
-   * What runs nightly
-   * What runs weekly or monthly
-   * What requires human approval
-3. Risks and failure modes to monitor
+* Proposed automation pipeline
+* Explanation of:
+    * What runs nightly
+    * What runs weekly or monthly
+    * What requires human approval
+* Risks and failure modes to monitor
 
 ---
 
