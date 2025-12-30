@@ -6,9 +6,7 @@ body-class: index-page
 <!-- ![Technology Product Development]({{URLROOT}}/shared/img/technology-product-development-hero.jpg)
 *[Photo by Dall-E-3](https://openai.com/dall-e-3)* -->
 
-This course prepares you to use AI in industry.
 
-Building on previous experience with machine learning modeling, you will learn to design and implement end-to-end AI systems. You will learn to deploy these systems into working environments and monitor them for iterative improvement.  
 
 
 <!-- ![From Idea to Product]({{URLROOT}}/shared/img/x99-hero.jpg)
@@ -16,6 +14,10 @@ Building on previous experience with machine learning modeling, you will learn t
 Let’s make something the world hasn’t seen yet. -->
 
 ## CSE 455 - Course Index
+
+This course prepares you to use AI in industry.
+
+Building on previous experience with machine learning modeling, you will learn to design and implement end-to-end AI systems. You will learn to deploy these systems into working environments and monitor them for iterative improvement.  
 
 This is a handy index page for the course content of CSE 455. This content is subject to change without notice and is for informational purposes only. 
 

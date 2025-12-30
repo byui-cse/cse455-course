@@ -3,8 +3,7 @@ title: Module 01: Overview
 body-class: index-page
 ---
 
-<!-- ![Sprint]({{URLROOT}}/shared/img/sprint_full.png)
-*[Photo by The Sprint Book](https://www.thesprintbook.com/the-design-sprint)* -->
+![Skittles vs M&Ms]({{URLROOT}}/shared/img/skittles_vs_mnms.jpg)
 
 ## Introductory Project - Skittles and M&Ms
 

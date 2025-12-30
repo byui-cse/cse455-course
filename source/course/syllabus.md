@@ -36,7 +36,7 @@ This course is divided into two introductory projects and then a team project. T
 
 ### Introductory Projects
 
-A guided experience of integrating a machine learning model into a working system. You'll label data, train a model, deploy your model, evaluate the model, and make adjustments to improve the system. See the introductory project page for details.
+A guided experience of integrating a machine learning model into a working system. You'll label data, train a model, deploy your model, evaluate the model, and make adjustments to improve the system. See [module 1](../module-01) and [module 2](../module-02) for details.
 
 ### Team Project
 
