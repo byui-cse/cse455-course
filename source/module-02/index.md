@@ -3,7 +3,7 @@ title: Module 02: Overview
 body-class: index-page
 ---
 
-![Monolithic App]({{URLROOT}}/shared/img/bread_on_table)
+![Monolithic App]({{URLROOT}}/shared/img/bread_on_table.jpg)
 *[Photo by Nano Banana](https://gemini.google.com)*
 
 ## Module 02 – Real-World Cart-Based Recommender System
@@ -74,6 +74,10 @@ By completing this project, you will learn how to:
 Build a simple recommender based on **co-purchase frequency**:
 
 Given items **A, B, C** in a cart, recommend items that are most frequently purchased together with those items.
+
+![Conditional Probability]({{URLROOT}}/shared/img/conditional_b.png)
+
+What is the probability of A occuring given B already occured?
 
 ---
 
