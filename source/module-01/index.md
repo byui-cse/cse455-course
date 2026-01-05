@@ -6,7 +6,7 @@ body-class: index-page
 ![Monolithic App]({{URLROOT}}/shared/img/recommendation_system.png)
 *[Photo by ChatGPT](https://chatgpt.com)*
 
-## Module 01 – Real-World Cart-Based Recommender System
+## Module 01 – Real-World Cart-Based Recommendation System
 
 **Focus Areas:**
 Sequential recommendation, temporal modeling, cold start, product lifecycle, retraining strategy, business constraints, production deployment
