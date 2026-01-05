@@ -27,7 +27,61 @@
         <div id="contents-wrapper">
             <div class="toc">
 <ul>
-<li><a href="#introductory-project-skittles-and-mms">Introductory Project - Skittles and M&amp;Ms</a></li>
+<li><a href="#skittles-and-mms-real-world-computer-vision-counting-system">Skittles and M&amp;Ms – Real-World Computer Vision Counting System</a><ul>
+<li><a href="#business-context">Business Context</a></li>
+<li><a href="#project-objectives">Project Objectives</a></li>
+<li><a href="#what-you-will-learn">What You Will Learn</a></li>
+</ul>
+</li>
+<li><a href="#phase-1-understanding-the-physical-system">Phase 1 – Understanding the Physical System</a><ul>
+<li><a href="#business-question">Business Question</a></li>
+<li><a href="#task">Task</a></li>
+<li><a href="#deliverables-add-to-your-executive-summary">Deliverables (Add to your Executive Summary)</a></li>
+</ul>
+</li>
+<li><a href="#phase-2-data-labeling-with-cvat">Phase 2 – Data Labeling with CVAT</a><ul>
+<li><a href="#business-question_1">Business Question</a></li>
+<li><a href="#task_1">Task</a></li>
+<li><a href="#requirements">Requirements</a></li>
+<li><a href="#deliverables-add-to-your-executive-summary_1">Deliverables (Add to your Executive Summary)</a></li>
+</ul>
+</li>
+<li><a href="#phase-3-training-a-yolo-detection-model">Phase 3 – Training a YOLO Detection Model</a><ul>
+<li><a href="#business-question_2">Business Question</a></li>
+<li><a href="#task_2">Task</a></li>
+<li><a href="#requirements_1">Requirements</a></li>
+<li><a href="#deliverables-add-to-your-executive-summary_2">Deliverables (Add to your Executive Summary)</a></li>
+</ul>
+</li>
+<li><a href="#phase-4-counting-via-line-crossing-logic">Phase 4 – Counting via Line-Crossing Logic</a><ul>
+<li><a href="#business-question_3">Business Question</a></li>
+<li><a href="#task_3">Task</a></li>
+<li><a href="#requirements_2">Requirements</a></li>
+<li><a href="#deliverables-add-to-your-executive-summary_3">Deliverables (Add to your Executive Summary)</a></li>
+</ul>
+</li>
+<li><a href="#phase-5-evaluating-system-performance">Phase 5 – Evaluating System Performance</a><ul>
+<li><a href="#business-question_4">Business Question</a></li>
+<li><a href="#task_4">Task</a></li>
+<li><a href="#metrics">Metrics</a></li>
+<li><a href="#deliverables-add-to-your-executive-summary_4">Deliverables (Add to your Executive Summary)</a></li>
+</ul>
+</li>
+<li><a href="#phase-6-deployment-as-a-production-service">Phase 6 – Deployment as a Production Service</a><ul>
+<li><a href="#business-question_5">Business Question</a></li>
+<li><a href="#task_5">Task</a></li>
+<li><a href="#requirements_3">Requirements</a></li>
+<li><a href="#deliverables">Deliverables</a></li>
+</ul>
+</li>
+<li><a href="#phase-7-improving-the-system">Phase 7 – Improving the System</a><ul>
+<li><a href="#business-question_6">Business Question</a></li>
+<li><a href="#task_6">Task</a></li>
+<li><a href="#stretch-goals">Stretch Goals</a></li>
+<li><a href="#deliverables-add-to-your-executive-summary_5">Deliverables (Add to your Executive Summary)</a></li>
+<li><a href="#final-outcome">Final Outcome</a></li>
+</ul>
+</li>
 </ul>
 </div>
 
@@ -45,15 +99,282 @@
     </header>
 	<article>
 		<p><img alt="Skittles vs M&amp;Ms" src="https://byui-cse.github.io/cse455-course/shared/img/skittles_vs_mnms.jpg" /></p>
-<h2 id="introductory-project-skittles-and-mms">Introductory Project - Skittles and M&amp;Ms</h2>
-<p>In this project, students will design and build an end-to-end AI system modeled after real industrial production lines. The scenario is simple on the surface—M&amp;Ms and Skittles move down a conveyor belt, and the system must detect, classify, and count them—but it mirrors the exact challenges faced by modern manufacturing, food processing, and logistics companies. Similar systems exist today in potato processing plants, bakery packaging lines, automotive assembly, and quality-control facilities around the world. Your goal is to turn raw visual data into automated decision-making that operates reliably and in real time.</p>
-<p>Students will label image data, train a computer vision model, export the model to a usable format, and deploy it inside a program that runs continuously as candy passes a fixed camera point. The system should count each candy accurately and produce running totals, reflecting how many M&amp;Ms and how many Skittles have passed. Along the way, students will confront the full AI lifecycle: dataset creation, model training and experimentation, pipeline design, performance tradeoffs, and system integration.</p>
-<p>Once the first version is working, the focus will shift to evaluation. Students will measure how often the system gets it right, how quickly it can process frames, and how it behaves under real-time constraints. They will identify bottlenecks, design improvements, and implement iterations—just as real ML engineers do when models move from a research environment to production.</p>
-<p>The deeper purpose is to bridge the gap between theory and practice. Students won’t just “train a model”; they will build a functioning product that solves a defined problem in a defined environment. By the end, they should understand not just how AI works, but how AI systems are built, deployed, maintained, and improved.</p>
+<h2 id="skittles-and-mms-real-world-computer-vision-counting-system">Skittles and M&amp;Ms – Real-World Computer Vision Counting System</h2>
+<p><strong>Focus Areas:</strong><br />
+Object detection, data labeling, model training, real-time inference, system latency, deployment, evaluation, iterative improvement</p>
+<p>In this project, students will design and build an end-to-end AI system modeled after real industrial production lines. The scenario is simple on the surface—M&amp;Ms and Skittles move down a conveyor belt, and the system must <strong>detect</strong>, <strong>classify</strong>, and <strong>count</strong> them—but it mirrors the exact challenges faced by modern manufacturing, food processing, and logistics companies. Similar systems exist today in potato processing plants, bakery packaging lines, automotive assembly, and quality-control facilities around the world. Your goal is to turn raw visual data into automated decision-making that operates reliably and in real time.</p>
+<p>You will label image data, train a computer vision model, export the model to a usable format, and deploy it inside a program that runs continuously as candy passes a fixed camera point. The system should count each candy accurately and produce running totals, reflecting how many M&amp;Ms and how many Skittles have passed. Along the way, students will confront the full AI lifecycle: dataset creation, model training and experimentation, pipeline design, performance tradeoffs, and system integration.</p>
+<p>Once the first version is working, the focus will shift to evaluation. You will measure how often the system gets it right, how quickly it can process frames, and how it behaves under real-time constraints. They will identify bottlenecks, design improvements, and implement iterations—just as real ML engineers do when models move from a research environment to production.</p>
 <div class="admonition warning">
 <p class="admonition-title">Subject to Change</p>
 <p>Keep in mind that your instructor may deviate somewhat from the following guide, and they have final say on assignment requirements, delivery methods, and due dates. So be sure to pay attention to both in-class and Canvas announcements.</p>
 </div>
+<hr />
+<h3 id="business-context">Business Context</h3>
+<p>Modern manufacturing and logistics facilities rely heavily on <strong>computer vision systems</strong> to monitor and automate physical processes. From potato processing plants and candy factories to parcel sorting centers and warehouse conveyors, cameras are used to track items as they move through production lines.</p>
+<p>The business requirement is deceptively simple:</p>
+<blockquote>
+<p>“As items move past a fixed point on a conveyor belt, detect them, count them accurately, and do so fast enough to keep up with production.”</p>
+</blockquote>
+<p>Behind this requirement is a full AI system: cameras, labeled data, trained models, real-time inference, counting logic, and operational constraints such as latency and reliability.</p>
+<p>In this module, you will build a <strong>production-style computer vision system</strong> that detects and counts candies (M&amp;Ms and Skittles) as they move along a conveyor belt under a fixed overhead camera.</p>
+<hr />
+<h3 id="project-objectives">Project Objectives</h3>
+<p>Your system must:</p>
+<ul>
+<li>Detect candies from a top-down camera view</li>
+<li>Process video captured at <strong>30 FPS</strong></li>
+<li>Reliably operate while processing <strong>~6 FPS</strong></li>
+<li>Count items as they cross a defined point on the conveyor belt</li>
+<li>Maintain running totals per candy color</li>
+<li>Operate in near–real time</li>
+<li>Be deployable as a <strong>local production service</strong></li>
+<li>Be designed for extension to other industries and products</li>
+</ul>
+<hr />
+<h3 id="what-you-will-learn">What You Will Learn</h3>
+<p>By completing this project, you will learn how to:</p>
+<ul>
+<li>Label video data using <strong>CVAT</strong></li>
+<li>Train an object detection model using <strong>YOLO</strong></li>
+<li>Export and load trained models for inference</li>
+<li>Design reliable <strong>line-crossing counting logic</strong></li>
+<li>Measure end-to-end system latency</li>
+<li>Understand trade-offs between accuracy, speed, and robustness</li>
+<li>Deploy a vision system using <strong>Docker</strong></li>
+<li>Think about AI systems as operational products, not just models</li>
+</ul>
+<hr />
+<h2 id="phase-1-understanding-the-physical-system">Phase 1 – Understanding the Physical System</h2>
+<h3 id="business-question">Business Question</h3>
+<blockquote>
+<p>“What assumptions can we safely make about the environment, and what must the system handle?”</p>
+</blockquote>
+<hr />
+<h3 id="task">Task</h3>
+<p>Analyze the physical setup:</p>
+<ul>
+<li>Fixed overhead camera</li>
+<li>Single-lane conveyor belt</li>
+<li>Known frame rate (30 FPS)</li>
+<li>Multiple video files at different belt speeds</li>
+</ul>
+<hr />
+<h3 id="deliverables-add-to-your-executive-summary">Deliverables (Add to your Executive Summary)</h3>
+<ol>
+<li>Written description of system assumptions</li>
+<li>Diagram showing:<ul>
+<li>Camera position</li>
+<li>Conveyor direction</li>
+<li>Counting line</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="phase-2-data-labeling-with-cvat">Phase 2 – Data Labeling with CVAT</h2>
+<h3 id="business-question_1">Business Question</h3>
+<blockquote>
+<p>“How do we create training data for a vision system?”</p>
+</blockquote>
+<hr />
+<h3 id="task_1">Task</h3>
+<ul>
+<li>Import provided video files into <a href="https://app.cvat.ai/">https://app.cvat.ai/</a></li>
+<li>Extract frames for labeling</li>
+<li>Label candies by <strong>color class</strong><ul>
+<li>Skittles<ul>
+<li>Purple</li>
+<li>Orange</li>
+<li>Yellow</li>
+<li>Red</li>
+<li>Green</li>
+</ul>
+</li>
+<li>M&amp;Ms<ul>
+<li>Brown</li>
+<li>Blue</li>
+<li>Orange</li>
+<li>Yellow</li>
+<li>Red</li>
+<li>Green</li>
+</ul>
+</li>
+<li>(For this exercise, we'll group Purple Skittles and Brown M&amp;Ms together)</li>
+</ul>
+</li>
+<li>Export annotations in a YOLO-compatible format</li>
+</ul>
+<p><img alt="Skittles vs M&amp;Ms" src="https://byui-cse.github.io/cse455-course/shared/img/mnm_skittles.jpg" /></p>
+<hr />
+<h3 id="requirements">Requirements</h3>
+<ul>
+<li>Use instructor-provided video files</li>
+<li>Label at least <strong>700 items per class</strong></li>
+<li>Define consistent class names and labeling rules</li>
+</ul>
+<hr />
+<h3 id="deliverables-add-to-your-executive-summary_1">Deliverables (Add to your Executive Summary)</h3>
+<ol>
+<li>Description of labeling strategy</li>
+<li>Screenshot of CVAT labeling interface</li>
+</ol>
+<hr />
+<h2 id="phase-3-training-a-yolo-detection-model">Phase 3 – Training a YOLO Detection Model</h2>
+<h3 id="business-question_2">Business Question</h3>
+<blockquote>
+<p>“Can we reliably detect candies under real operating conditions?”</p>
+</blockquote>
+<hr />
+<h3 id="task_2">Task</h3>
+<ul>
+<li>Train a YOLOv8 detection model using labeled data</li>
+<li>Validate the model on held-out frames</li>
+<li>Export the trained model for inference</li>
+</ul>
+<hr />
+<h3 id="requirements_1">Requirements</h3>
+<ul>
+<li>Use YOLOv8 (Ultralytics)</li>
+<li>Train a detection-only model</li>
+<li>Document training parameters</li>
+</ul>
+<hr />
+<h3 id="deliverables-add-to-your-executive-summary_2">Deliverables (Add to your Executive Summary)</h3>
+<ol>
+<li>Description of model architecture</li>
+<li>Training and validation results</li>
+<li>Example detection output on unseen frames</li>
+</ol>
+<hr />
+<h2 id="phase-4-counting-via-line-crossing-logic">Phase 4 – Counting via Line-Crossing Logic</h2>
+<h3 id="business-question_3">Business Question</h3>
+<blockquote>
+<p>“Detection alone is not enough—how do we count reliably?”</p>
+</blockquote>
+<hr />
+<h3 id="task_3">Task</h3>
+<p>Build counting logic that:</p>
+<ul>
+<li>Defines a virtual counting line</li>
+<li>Detects when an object crosses the line</li>
+<li>Prevents double-counting</li>
+<li>Maintains per-class totals</li>
+</ul>
+<hr />
+<h3 id="requirements_2">Requirements</h3>
+<ul>
+<li>Frame-based inference (~6 FPS)</li>
+<li>Line-crossing detection</li>
+<li>Robust handling of overlapping objects</li>
+</ul>
+<hr />
+<h3 id="deliverables-add-to-your-executive-summary_3">Deliverables (Add to your Executive Summary)</h3>
+<ol>
+<li>Explanation of counting logic</li>
+<li>Example sequence showing:<ul>
+<li>Detection</li>
+<li>Line crossing</li>
+<li>Count increment</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="phase-5-evaluating-system-performance">Phase 5 – Evaluating System Performance</h2>
+<h3 id="business-question_4">Business Question</h3>
+<blockquote>
+<p>“Is this system good enough for production?”</p>
+</blockquote>
+<hr />
+<h3 id="task_4">Task</h3>
+<p>Evaluate your system on a full video:</p>
+<ul>
+<li>Measure total counts per class</li>
+<li>Compare to known ground truth</li>
+<li>Measure processing latency</li>
+</ul>
+<hr />
+<h3 id="metrics">Metrics</h3>
+<ul>
+<li>Counting accuracy (per class)</li>
+<li>Frames processed per second</li>
+<li>End-to-end latency per frame</li>
+</ul>
+<hr />
+<h3 id="deliverables-add-to-your-executive-summary_4">Deliverables (Add to your Executive Summary)</h3>
+<ol>
+<li>Final counts vs expected counts</li>
+<li>Performance metrics table</li>
+<li>Written analysis:<ul>
+<li>Where does the system fail?</li>
+<li>What trade-offs were made?</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="phase-6-deployment-as-a-production-service">Phase 6 – Deployment as a Production Service</h2>
+<h3 id="business-question_5">Business Question</h3>
+<blockquote>
+<p>“How would this run on the factory floor?”</p>
+</blockquote>
+<hr />
+<h3 id="task_5">Task</h3>
+<p>Deploy the system as a local service:</p>
+<ul>
+<li>Ingest streaming video or frames</li>
+<li>Perform detection and counting</li>
+<li>Expose results via an API</li>
+</ul>
+<hr />
+<h3 id="requirements_3">Requirements</h3>
+<ul>
+<li>Package using <strong>Docker</strong></li>
+<li>Provide a simple HTTP endpoint</li>
+<li>Designed for <strong>local deployment</strong> to minimize latency</li>
+</ul>
+<hr />
+<h3 id="deliverables">Deliverables</h3>
+<ol>
+<li>Running containerized system</li>
+<li>Example API request/response</li>
+<li>Short explanation of deployment decisions</li>
+</ol>
+<hr />
+<h2 id="phase-7-improving-the-system">Phase 7 – Improving the System</h2>
+<h3 id="business-question_6">Business Question</h3>
+<blockquote>
+<p>“How could this system be made better over time?”</p>
+</blockquote>
+<hr />
+<h3 id="task_6">Task</h3>
+<p>Identify and propose improvements, such as:</p>
+<ul>
+<li>Better labeling strategies</li>
+<li>Improved counting robustness</li>
+<li>Handling variable belt speeds</li>
+<li>Model retraining strategies</li>
+<li>Extending to new product types</li>
+</ul>
+<hr />
+<h3 id="stretch-goals">Stretch Goals</h3>
+<ul>
+<li>Improve classification accuracy</li>
+<li>Add support for additional candy types</li>
+<li>Handle variable belt speeds within a single video</li>
+</ul>
+<hr />
+<h3 id="deliverables-add-to-your-executive-summary_5">Deliverables (Add to your Executive Summary)</h3>
+<ol>
+<li>List of proposed improvements</li>
+<li>Justification tied to:<ul>
+<li>Business value</li>
+<li>Operational reliability</li>
+<li>Scalability to other industries</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h3 id="final-outcome">Final Outcome</h3>
+<p>By the end of this module, you will have built a <strong>real computer vision system</strong> that mirrors how AI is deployed in manufacturing, food processing, and logistics environments. More importantly, you will understand how raw video becomes reliable, actionable data through careful system design—not just model training.</p>
 	</article>
 	<script src="https://byui-cse.github.io/cse455-course/shared/lib/highlight/highlight.pack.js"></script>
 	<script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.js"></script>
