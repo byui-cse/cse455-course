@@ -3,8 +3,8 @@ title: Module 01: Overview
 body-class: index-page
 ---
 
-![Monolithic App]({{URLROOT}}/shared/img/bread_on_table.jpg)
-*[Photo by Nano Banana](https://gemini.google.com)*
+![Monolithic App]({{URLROOT}}/shared/img/recommendation_system.png)
+*[Photo by ChatGPT](https://chatgpt.com)*
 
 ## Module 01 – Real-World Cart-Based Recommender System
 
