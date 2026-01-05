@@ -152,6 +152,7 @@ Sequential recommendation, temporal modeling, cold start, product lifecycle, ret
 <p>Given items <strong>A, B, C</strong> in a cart, recommend items that are most frequently purchased together with those items.</p>
 <p><img alt="Conditional Probability" src="https://byui-cse.github.io/cse455-course/shared/img/conditional_b.png" /></p>
 <p><strong>Conditional Probability</strong> What is the probability of A occuring given B already occured?</p>
+<p>Use <a href="../course/data/cart/2016_01recommender_notebook_v3.ipynb">2016_01recommender_notebook_v3.ipynb</a> as a starting point. You can add whatever other models you would like to use. You will be responsible for figuring out how to deploy any models you pick.</p>
 <hr />
 <h3 id="requirements">Requirements</h3>
 <ul>
@@ -338,6 +339,7 @@ Sequential recommendation, temporal modeling, cold start, product lifecycle, ret
 </ul>
 </li>
 <li>Example showing how business rules override model output</li>
+<li>Implement a system that removes discontinued items, out-of-stock items while also supporting promotions and cold-start products</li>
 </ol>
 <hr />
 <h2 id="phase-7-automating-training-and-filtering">Phase 7 – Automating Training and Filtering</h2>
@@ -353,6 +355,9 @@ Sequential recommendation, temporal modeling, cold start, product lifecycle, ret
 <li>Updating discontinued and out-of-stock lists</li>
 <li>Safely deploying updated models</li>
 </ul>
+<p>Use the <a href="../course/data/cart/cart_export_15_05.csv">cart_export_19_05.csv</a> data for the remainder of the questions.
+Use the <a href="../course/data/cart/discontinued.json">discontinued.json</a>, <a href="../course/data/cart/new_items.json">new_items.json</a>, <a href="../course/data/cart/out_of_stock.json">out_of_stock.json</a>, and <a href="../course/data/cart/special_items.json">special_items.json</a> files in your system. You'll need to update those files to work with your system. These files are generated nightly. </p>
+<p>You can request access to the cart history based on your analysis, but each report takes ~ four hours to create and costs the business between $1.21 and $4.53 in compute each time the report is created.</p>
 <hr />
 <h3 id="deliverables_3">Deliverables</h3>
 <ul>
