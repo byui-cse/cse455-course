@@ -15,9 +15,11 @@
     <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/fonts/fontawesome/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.css">
     <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/highlight/styles/monokai-sublime.min.css">
-	<link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/main.css?v1.2">
+	<link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/main.css?v1.4">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">    
     <meta charset="utf-8">
 
@@ -70,15 +72,49 @@
 <p>Next we will create the following folders and files.</p>
 <p><img alt="Basic Folder Structure" src="https://byui-cse.github.io/cse455-course/shared/img/docker_folders.jpg" /></p>
 <p>Copy the two files into the v1 folder inside of models. Then rename xgb_model.joblib to model.joblib</p>
-<p>Copy the following into the Dockerfile (notice that this file doesn't have an extension)</p>
-<p>Run this command</p>
+<p>Copy the following into the <code>Dockerfile</code> (notice that this file doesn't have an extension)</p>
+<div class="codehilite"><pre><span></span><code><span class="n">FROM</span><span class="w"> </span><span class="n">python</span><span class="p">:</span><span class="mf">3.11</span><span class="o">-</span><span class="n">slim</span>
+<span class="n">WORKDIR</span><span class="w"> </span><span class="o">/</span><span class="n">app</span>
+
+<span class="c1"># Install system deps for xgboost if needed (kept minimal)</span>
+<span class="n">RUN</span><span class="w"> </span><span class="n">apt</span><span class="o">-</span><span class="n">get</span><span class="w"> </span><span class="n">update</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">apt</span><span class="o">-</span><span class="n">get</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="o">-</span><span class="n">y</span><span class="w"> </span><span class="n">build</span><span class="o">-</span><span class="n">essential</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">rm</span><span class="w"> </span><span class="o">-</span><span class="n">rf</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">lists</span><span class="o">/*</span>
+
+<span class="n">COPY</span><span class="w"> </span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span><span class="w"> </span><span class="o">./</span>
+<span class="n">RUN</span><span class="w"> </span><span class="n">pip</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">cache</span><span class="o">-</span><span class="n">dir</span><span class="w"> </span><span class="o">-</span><span class="n">r</span><span class="w"> </span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
+
+<span class="c1"># Copy application files and model artifacts (ensure these exist in build context)</span>
+<span class="n">COPY</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="o">/</span><span class="n">app</span>
+
+<span class="n">EXPOSE</span><span class="w"> </span><span class="mi">5000</span>
+<span class="c1"># Use gunicorn for production; fallback to Flask dev server if not installed</span>
+<span class="n">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;gunicorn&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;-w&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;4&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;-b&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;0.0.0.0:5000&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;app.app:app&quot;</span><span class="p">]</span>
+</code></pre></div>
+
+<p>Copy this into the <code>requirements.txt</code> file:</p>
+<div class="codehilite"><pre><span></span><code>flask
+gunicorn
+pandas
+xgboost
+scikit-learn==1.5.2
+joblib
+</code></pre></div>
+
+<p>Run this command to build the container</p>
+<div class="admonition warning">
+<p class="admonition-title">Docker Must Be Running</p>
+<p>If you get an error, you may have forgotten to start Docker!</p>
+<p>Make sure you have Docker Desktop running.</p>
+</div>
 <div class="codehilite"><pre><span></span><code>docker build -t xgb-flask .
 </code></pre></div>
 
-<blockquote>
-<p>docker run -p 5000:5000 xgb-flask </p>
-<p>curl -X POST http://localhost:5000/predict -H "Content-Type: application/json" -d '{"cylinders":8,"displacement":307,"acceleration":12,"weight":3504,"horsepower":130,"year":75,"origin":5,"name":"chevy ltd"}'</p>
-</blockquote>
+<p>Then let's run it locally</p>
+<div class="codehilite"><pre><span></span><code>docker run -p 5000:5000 xgb-flask 
+</code></pre></div>
+
+<p>You can test your code from <code>git bash</code> or the <code>terminal</code></p>
+<div class="codehilite"><pre><span></span><code>curl -X POST http://localhost:5000/predict -H &quot;Content-Type: application/json&quot; -d &#39;{&quot;cylinders&quot;:8,&quot;displacement&quot;:307,&quot;acceleration&quot;:12,&quot;weight&quot;:3504,&quot;horsepower&quot;:130,&quot;year&quot;:75,&quot;origin&quot;:5,&quot;name&quot;:&quot;chevy ltd&quot;}&#39;
+</code></pre></div>
 	</article>
 	<script src="https://byui-cse.github.io/cse455-course/shared/lib/highlight/highlight.pack.js"></script>
 	<script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.js"></script>

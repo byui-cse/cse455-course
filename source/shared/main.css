@@ -61,6 +61,7 @@ header {
   position: sticky;
   top: 0;
   border-bottom: 1px solid var(--light-border-color);
+  z-index: 999;
 }
 
 header #titles {
@@ -629,4 +630,8 @@ div.phase-table + table tr th {
 }
 .copy-button:hover span.green {
   color:#61a000; 
+}
+
+.material-symbols-outlined {
+  vertical-align: middle;
 }
