@@ -600,3 +600,33 @@ div.phase-table + table tr th {
   border-bottom: 3px solid black;
 }
 
+.code-container {
+  position: relative;
+  margin:40px 0;
+}
+.copy-button {
+	position: absolute;
+	top: -36px;
+	right: 0;
+	padding: 10px 15px;
+	background: #2f2f2f;
+	color: #bcbcbc;
+	border: none;
+	cursor: pointer;
+	border-radius: 3px;
+  font-size: 14px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.copy-button span {
+  font-size:14px;
+}
+.copy-button:hover {
+  background-color: #162b35;
+}
+.copy-button:hover span {
+  color:#66d9ef;
+}
+.copy-button:hover span.green {
+  color:#61a000; 
+}
