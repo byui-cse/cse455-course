@@ -72,8 +72,91 @@ scikit-learn==1.5.2
 joblib
 ```
 
+Next copy this into the app.py file:
 
-Run this command to build the container
+```
+from flask import Flask, request, jsonify
+import pandas as pd
+import json
+from joblib import load
+from pathlib import Path
+
+app = Flask(__name__)
+
+# Load model and feature list at startup
+CURRENT_VERSION_PATH = Path('models/v1')
+MODEL_PATH = CURRENT_VERSION_PATH / 'model.joblib'
+FEATURES_PATH = CURRENT_VERSION_PATH / 'feature_names.json'
+
+# Load the model
+model = load(MODEL_PATH)
+
+# Load expected features
+with open(FEATURES_PATH, 'r') as f:
+    expected_features = json.load(f)
+
+
+def preprocess_for_prod_from_json(payload):
+    if isinstance(payload, dict):
+        records = [payload]
+    else:
+        records = payload    
+    df = pd.DataFrame(records)
+    
+    # --- Numeric preprocessing ---
+    if 'horsepower' in df.columns:
+        df['horsepower'] = df['horsepower'].replace('?', 0).astype(float)
+    
+    # --- Categorical preprocessing ---
+    if 'origin' in df.columns:
+        df['origin'] = df['origin'].map({1: 'USA', 2: 'Europe', 3: 'Japan'}).fillna('Unknown')
+    if 'name' in df.columns:
+        df['maker'] = df['name'].astype(str).str.split(' ').str[0]
+    else:
+        df['maker'] = 'Unknown'
+    
+    # --- One-hot encoding ---
+    origin_dummies = pd.get_dummies(df['origin'], prefix='', prefix_sep='') if 'origin' in df.columns else pd.DataFrame(index=df.index)
+    maker_dummies = pd.get_dummies(df[['maker']]) if 'maker' in df.columns else pd.DataFrame(index=df.index)
+    
+    # --- Combine numeric + dummies ---
+    numeric_cols = [c for c in ['cylinders','displacement','acceleration','weight','horsepower','year'] if c in df.columns]
+    Xcand = pd.concat([df[numeric_cols], origin_dummies, maker_dummies], axis=1)
+    
+  
+    # Add missing columns
+    for col in expected_features:
+        if col not in Xcand.columns:
+            Xcand[col] = 0
+    # Keep only expected columns in order
+    Xcand = Xcand[expected_features]
+    
+    return Xcand
+
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    payload = request.get_json()
+    if payload is None:
+        return jsonify({'error': 'Invalid or missing JSON payload'}), 400
+    try:
+        Xp = preprocess_for_prod_from_json(payload)
+        preds = model.predict(Xp)
+        return jsonify({'predictions': preds.tolist()})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({'status': 'ok'})
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+```
+
+Run this command to build the container. Make sure you are in the folder with the Dockerfile 
 
 !!! warning "Docker Must Be Running"
 
@@ -88,7 +171,7 @@ docker build -t xgb-flask .
 Then let's run it locally
 
 ```
-docker run -p 5000:5000 xgb-flask 
+docker run --rm -p 5000:5000 xgb-flask 
 ```
 You can test your code from `git bash` or the `terminal`
 
