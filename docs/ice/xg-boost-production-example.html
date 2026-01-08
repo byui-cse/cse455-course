@@ -27,7 +27,11 @@
         <div id="contents-wrapper">
             <div class="toc">
 <ul>
-<li><a href="#xgboost-to-docker">XGBoost to Docker</a></li>
+<li><a href="#xgboost-to-docker">XGBoost to Docker</a><ul>
+<li><a href="#review-the-notebook">Review the Notebook</a></li>
+<li><a href="#prepare-things-for-containerization">Prepare things for containerization</a></li>
+</ul>
+</li>
 </ul>
 </div>
 
@@ -47,12 +51,40 @@
 		<p><img alt="Monolithic App" src="https://byui-cse.github.io/cse455-course/shared/img/xgb_production.png" />
 <em><a href="https://chatgpt.com">Photo by ChatGPT</a></em></p>
 <h2 id="xgboost-to-docker">XGBoost to Docker</h2>
-<p><a href="https://colab.research.google.com/github/byui-cse/cse455-course/blob/master/course/notebooks/XGBRegressor_example.ipynb" target="_blank"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
+<p>Open this example in Colab</p>
+<p><a href="https://colab.research.google.com/github/byui-cse/cse455-course/blob/main/docs/course/notebooks/XGBRegressor_example.ipynb" target="_blank"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
+<h3 id="review-the-notebook">Review the Notebook</h3>
+<p>You may have similar notebooks that you have previously built. This example demonstrates a straightforward workflow to prepare an XGBoost model for deployment within a Docker container.</p>
+<p>First, we define a <strong>preprocessing function</strong> that performs all necessary data transformations. Centralizing preprocessing in a single function ensures consistency and maintainability, allowing us to apply the same transformations during both training and inference. It is essential to replicate all the transformations applied in the original notebook to maintain model accuracy and integrity.</p>
+<p>Next, we <strong>persist the trained model</strong> using <strong><code>joblib</code></strong>, a Python library optimized for serializing and deserializing large NumPy arrays and machine learning models efficiently. <code>joblib</code> enables us to save the model to disk and later load it back into memory for inference without retraining.</p>
+<p>Additionally, we save the <strong>feature names</strong> into a JSON file. This ensures that during deployment, the input data aligns exactly with the features expected by the model, preventing mismatches or errors when feeding new data for prediction.</p>
+<p>By following these steps—centralized preprocessing, saving the model with <code>joblib</code>, and storing feature metadata—we create a robust and reproducible workflow that simplifies deploying machine learning models in Dockerized production environments.</p>
+<p>Python’s <strong><code>pickle</code></strong> module is commonly used to serialize and save Python objects, including machine learning models. <strong><code>joblib</code></strong> serves a similar purpose but is optimized for objects that contain large NumPy arrays, making it faster and more memory-efficient for most machine learning models. In practice, both <code>pickle</code> and <code>joblib</code> allow you to save and load models for later use, but <code>joblib</code> is generally preferred for models with large numerical data, while <code>pickle</code> works for general-purpose Python objects.</p>
+<p>Run the notebook and it will produce a couple of artifacts that we will need to download:</p>
+<ul>
+<li>feature_names.json</li>
+<li>xgb_model.joblib</li>
+</ul>
+<h3 id="prepare-things-for-containerization">Prepare things for containerization</h3>
+<p>Start up Docker Desktop.</p>
+<p>Next we will create the following folders and files.</p>
+<p><img alt="Basic Folder Structure" src="https://byui-cse.github.io/cse455-course/shared/img/docker_folders.jpg" /></p>
+<p>Copy the two files into the v1 folder inside of models. Then rename xgb_model.joblib to model.joblib</p>
+<p>Copy the following into the Dockerfile (notice that this file doesn't have an extension)</p>
+<p>Run this command</p>
+<div class="codehilite"><pre><span></span><code>docker build -t xgb-flask .
+</code></pre></div>
+
+<blockquote>
+<p>docker run -p 5000:5000 xgb-flask </p>
+<p>curl -X POST http://localhost:5000/predict -H "Content-Type: application/json" -d '{"cylinders":8,"displacement":307,"acceleration":12,"weight":3504,"horsepower":130,"year":75,"origin":5,"name":"chevy ltd"}'</p>
+</blockquote>
 	</article>
 	<script src="https://byui-cse.github.io/cse455-course/shared/lib/highlight/highlight.pack.js"></script>
 	<script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.js"></script>
     <script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/contrib/auto-render.min.js"></script>
 	<script src="https://byui-cse.github.io/cse455-course/shared/lib/smartquotes/smartquotes.min.js"></script>
+    <script src="https://byui-cse.github.io/cse455-course/shared/lib/copy/copy.js"></script>
     <script>
 
         /* Startup scripts for katex rendering */
