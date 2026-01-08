@@ -32,3 +32,7 @@ For your convenience, links to each module overview is listed below, but please 
 * [Module 01](./module-01/)
 * [Module 02](./module-02/)
 * [Module 03](./module-03/)
+
+Helpful modules
+
+* [XGBoost to Docker](./ice/xg-boost-production-example.html)
