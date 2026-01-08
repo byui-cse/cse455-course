@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>NN to Docker</title>
+    <style>
+        @font-face {
+            font-family: 'icomoon';
+            src: url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.eot');
+            src: url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.eot#iefix-8k8p81') format('embedded-opentype'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.ttf') format('truetype'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.woff') format('woff'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.svg#icomoon') format('svg');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/reset.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/fonts/fontawesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/highlight/styles/monokai-sublime.min.css">
+	<link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/main.css?v1.4">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">    
+    <meta charset="utf-8">
+
+</head>
+<body class="index-page">
+     <div id="modal-screen">
+        <div id="contents-wrapper">
+            <div class="toc">
+<ul>
+<li><a href="#nn-to-docker">NN to Docker</a><ul>
+<li><a href="#review-the-notebook">Review the Notebook</a></li>
+<li><a href="#prepare-things-for-containerization">Prepare things for containerization</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+            <a href="#" id="hide-contents" title="Close Table of Contents"><i class="far fa-window-close"></i></a>
+        </div>
+    </div>
+	<header>
+        <span class="icon-byui-logo"></span>
+        <div id="titles">
+            <h1>CSE 455 - Developing AI Systems</h1>
+            <h2>NN to Docker</h2>
+            <nav><a href="https://byui-cse.github.io/cse455-course"><i class="fas fa-home"></i></a><a href="https://byui-cse.github.io/cse455-course/module-01/">Module 1</a><a href="https://byui-cse.github.io/cse455-course/module-02/">Module 2</a><a href="https://byui-cse.github.io/cse455-course/module-03/">Module 3 - 6</a></nav>
+        </div>
+        <a href="#" id="show-contents" title="Show Table of Contents"><i class="far fa-list-alt"></i></a>
+    </header>
+	<article>
+		<p><img alt="Monolithic App" src="https://byui-cse.github.io/cse455-course/shared/img/nn_production.png" />
+<em><a href="https://chatgpt.com">Photo by ChatGPT</a></em></p>
+<h2 id="nn-to-docker">NN to Docker</h2>
+<p>You should review the <a href="https://byui-cse.github.io/cse455-course/ice/xg-boost-production-example.html">XGB Example</a> before completing these instructions.</p>
+<p>Open this example in Colab</p>
+<p><a href="https://colab.research.google.com/github/byui-cse/cse455-course/blob/main/docs/course/notebooks/Simple_NN_example.ipynb" target="_blank"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
+<h3 id="review-the-notebook">Review the Notebook</h3>
+<p>When moving from <strong>XGBoost to a neural network</strong>, the overall deployment pattern remains the same—preprocess inputs, load a trained model, and serve predictions—but several <strong>important production details change</strong>. Neural networks are far more sensitive to input scaling, model format, and runtime environment, which makes consistency between training and inference even more critical.</p>
+<p>Unlike tree-based models, neural networks <strong>require normalized inputs</strong> to behave correctly. During training, we fit a <code>MinMaxScaler</code> on the training data and apply it to all inputs. In production, this exact same scaler must be reused. As a result, the scaler itself becomes a <strong>first-class production artifact</strong>, saved alongside the model and loaded at application startup. Failing to reuse the same scaler will silently degrade model performance, even if the model loads correctly.</p>
+<p>The neural network model is persisted using <strong>Keras’s native <code>.keras</code> format</strong> rather than <code>joblib</code>. This format stores the full model architecture, weights, and configuration in a single file and is designed specifically for TensorFlow/Keras models. Unlike <code>joblib</code>, which serializes Python objects, the <code>.keras</code> format is framework-aware and ensures the model can be reliably reloaded for inference. This also means that the runtime environment must include compatible versions of TensorFlow and Keras.</p>
+<p>Another key difference is <strong>runtime behavior under load</strong>. XGBoost models perform fast, deterministic CPU-bound inference with minimal overhead. Neural networks, even when small, rely on dense numerical computation and underlying linear algebra libraries. In production, this can lead to higher CPU utilization, increased latency under concurrency, and sensitivity to threading and worker configuration in tools like Gunicorn. These differences become visible when stress testing the service.</p>
+<p>Finally, neural network deployments often emit additional <strong>runtime warnings</strong> related to hardware acceleration (such as missing CUDA drivers) or numerical optimizations. These warnings are normal in CPU-only environments and do not indicate errors, but they highlight that neural networks are more tightly coupled to the execution environment than traditional ML models.</p>
+<p>Run the notebook and it will produce a couple of artifacts that we will need to download:</p>
+<ul>
+<li>feature_names.json</li>
+<li>model.keras</li>
+<li>scaler.joblib</li>
+</ul>
+<h3 id="prepare-things-for-containerization">Prepare things for containerization</h3>
+<p>Start up Docker Desktop.</p>
+<p>Next we will create the following folders and files.</p>
+<p><img alt="Basic Folder Structure" src="https://byui-cse.github.io/cse455-course/shared/img/nn_docker_folders.jpg" /></p>
+<p>Copy the three files into the v1 folder inside of models.</p>
+<p>Copy the following into the <code>Dockerfile</code> (notice that this file doesn't have an extension)</p>
+<div class="codehilite"><pre><span></span><code><span class="n">FROM</span><span class="w"> </span><span class="n">python</span><span class="p">:</span><span class="mf">3.11</span><span class="o">-</span><span class="n">slim</span>
+<span class="n">WORKDIR</span><span class="w"> </span><span class="o">/</span><span class="n">app</span>
+
+<span class="c1"># Install system deps for xgboost if needed (kept minimal)</span>
+<span class="n">RUN</span><span class="w"> </span><span class="n">apt</span><span class="o">-</span><span class="n">get</span><span class="w"> </span><span class="n">update</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">apt</span><span class="o">-</span><span class="n">get</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="o">-</span><span class="n">y</span><span class="w"> </span><span class="n">build</span><span class="o">-</span><span class="n">essential</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">rm</span><span class="w"> </span><span class="o">-</span><span class="n">rf</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">lists</span><span class="o">/*</span>
+
+<span class="n">COPY</span><span class="w"> </span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span><span class="w"> </span><span class="o">./</span>
+<span class="n">RUN</span><span class="w"> </span><span class="n">pip</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">cache</span><span class="o">-</span><span class="n">dir</span><span class="w"> </span><span class="o">-</span><span class="n">r</span><span class="w"> </span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
+
+<span class="c1"># Copy application files and model artifacts (ensure these exist in build context)</span>
+<span class="n">COPY</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="o">/</span><span class="n">app</span>
+
+<span class="n">EXPOSE</span><span class="w"> </span><span class="mi">5000</span>
+<span class="c1"># Use gunicorn for production; fallback to Flask dev server if not installed</span>
+<span class="n">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;gunicorn&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;-w&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;4&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;-b&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;0.0.0.0:5000&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;app.app:app&quot;</span><span class="p">]</span>
+</code></pre></div>
+
+<p>Copy this into the <code>requirements.txt</code> file:</p>
+<div class="codehilite"><pre><span></span><code>flask&gt;=2.0
+gunicorn
+tensorflow&gt;=2.10
+pandas
+scikit-learn==1.6.1
+joblib
+numpy
+</code></pre></div>
+
+<p>Next copy this into the app.py file:</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">jsonify</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">joblib</span><span class="w"> </span><span class="kn">import</span> <span class="kp">load</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.keras.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_model</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># ----------------------------</span>
+<span class="c1"># Load model artifacts at startup</span>
+<span class="c1"># ----------------------------</span>
+<span class="n">CURRENT_VERSION_PATH</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;models/v1&quot;</span><span class="p">)</span>
+
+<span class="n">MODEL_PATH</span> <span class="o">=</span> <span class="n">CURRENT_VERSION_PATH</span> <span class="o">/</span> <span class="s2">&quot;model.keras&quot;</span>
+<span class="n">FEATURES_PATH</span> <span class="o">=</span> <span class="n">CURRENT_VERSION_PATH</span> <span class="o">/</span> <span class="s2">&quot;feature_names.json&quot;</span>
+<span class="n">SCALER_PATH</span> <span class="o">=</span> <span class="n">CURRENT_VERSION_PATH</span> <span class="o">/</span> <span class="s2">&quot;scaler.joblib&quot;</span>
+
+<span class="c1"># Load model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="n">MODEL_PATH</span><span class="p">)</span>
+
+<span class="c1"># Load feature list</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">FEATURES_PATH</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">expected_features</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="kp">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+<span class="c1"># Load scaler</span>
+<span class="n">scaler</span> <span class="o">=</span> <span class="kp">load</span><span class="p">(</span><span class="n">SCALER_PATH</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">preprocess_for_prod_from_json</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">records</span> <span class="o">=</span> <span class="p">[</span><span class="n">payload</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">records</span> <span class="o">=</span> <span class="n">payload</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+
+    <span class="c1"># --- Numeric preprocessing ---</span>
+    <span class="k">if</span> <span class="s2">&quot;horsepower&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;horsepower&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;horsepower&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;?&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="kp">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="c1"># --- Categorical preprocessing ---</span>
+    <span class="k">if</span> <span class="s2">&quot;origin&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;origin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;origin&quot;</span><span class="p">]</span>
+            <span class="o">.</span><span class="n">map</span><span class="p">({</span><span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;USA&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;Europe&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s2">&quot;Japan&quot;</span><span class="p">})</span>
+            <span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s2">&quot;Unknown&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;maker&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="kp">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="kp">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;maker&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Unknown&quot;</span>
+
+    <span class="c1"># --- One-hot encoding ---</span>
+    <span class="n">origin_dummies</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;origin&quot;</span><span class="p">],</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">prefix_sep</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;origin&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
+        <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">maker_dummies</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;maker&quot;</span><span class="p">]])</span>
+        <span class="k">if</span> <span class="s2">&quot;maker&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
+        <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># --- Combine numeric + dummies ---</span>
+    <span class="n">numeric_cols</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s2">&quot;cylinders&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;displacement&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;acceleration&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;weight&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;horsepower&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;year&quot;</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
+    <span class="p">]</span>
+
+    <span class="n">Xcand</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">numeric_cols</span><span class="p">],</span> <span class="n">origin_dummies</span><span class="p">,</span> <span class="n">maker_dummies</span><span class="p">],</span>
+        <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">)</span>
+
+    <span class="c1"># --- Enforce feature contract ---</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">expected_features</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Xcand</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">Xcand</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">Xcand</span> <span class="o">=</span> <span class="n">Xcand</span><span class="p">[</span><span class="n">expected_features</span><span class="p">]</span>
+
+    <span class="c1"># --- Scaling (critical for NN) ---</span>
+    <span class="n">X_scaled</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">Xcand</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">X_scaled</span>
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/predict&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">():</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get_json</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">payload</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid or missing JSON payload&quot;</span><span class="p">}),</span> <span class="mi">400</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">Xp</span> <span class="o">=</span> <span class="n">preprocess_for_prod_from_json</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+
+        <span class="n">preds</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xp</span><span class="p">)</span>
+        <span class="n">preds</span> <span class="o">=</span> <span class="n">preds</span><span class="o">.</span><span class="kp">ravel</span><span class="p">()</span><span class="o">.</span><span class="kp">tolist</span><span class="p">()</span>  <span class="c1"># JSON-safe</span>
+
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;predictions&quot;</span><span class="p">:</span> <span class="n">preds</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}),</span> <span class="mi">500</span>
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/health&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">health</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">})</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s2">&quot;0.0.0.0&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Run this command to build the container. Make sure you are in the folder with the Dockerfile </p>
+<div class="admonition warning">
+<p class="admonition-title">Docker Must Be Running</p>
+<p>If you get an error, you may have forgotten to start Docker!</p>
+<p>Make sure you have Docker Desktop running.</p>
+</div>
+<div class="codehilite"><pre><span></span><code>docker build -t nn-flask .
+</code></pre></div>
+
+<p>Then let's run it locally</p>
+<div class="codehilite"><pre><span></span><code>docker run --rm -p 5000:5000 nn-flask 
+</code></pre></div>
+
+<p>You can test your code from <code>git bash</code> or the <code>terminal</code></p>
+<div class="codehilite"><pre><span></span><code>curl -X POST http://localhost:5000/predict -H &quot;Content-Type: application/json&quot; -d &#39;{&quot;cylinders&quot;:8,&quot;displacement&quot;:307,&quot;acceleration&quot;:12,&quot;weight&quot;:3504,&quot;horsepower&quot;:130,&quot;year&quot;:75,&quot;origin&quot;:5,&quot;name&quot;:&quot;chevy ltd&quot;}&#39;
+</code></pre></div>
+	</article>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/highlight/highlight.pack.js"></script>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.js"></script>
+    <script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/contrib/auto-render.min.js"></script>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/smartquotes/smartquotes.min.js"></script>
+    <script src="https://byui-cse.github.io/cse455-course/shared/lib/copy/copy.js"></script>
+    <script>
+
+        /* Startup scripts for katex rendering */
+    	renderMathInElement(document.body,
+		{
+			delimiters: [
+				{left: "$$", right: "$$", display: true},
+				{left: "$", right: "$", display: false},
+			]
+    	});
+
+        /* Highlighting code */
+    	hljs.initHighlightingOnLoad();
+    	var elements = document.querySelectorAll('.language-text')
+		for (var i = 0; i < elements.length; i++) {
+  			elements[i].classList.add('hljs');
+		}
+
+        /* TOC support */
+        var hideContents = function(e){
+            console.log(e.target);
+            if(e.target.id === 'modal-screen' || e.target.nodeName.toLowerCase() === 'i') {
+                e.preventDefault();
+                document.querySelector('#contents-wrapper').classList.remove('active');
+                document.querySelector('#modal-screen').classList.remove('active');
+            }
+        }
+
+        var showContents = function(e){
+            e.preventDefault();
+            document.querySelector('#contents-wrapper').classList.add('active');
+            document.querySelector('#modal-screen').classList.add('active');
+        }
+
+        document.querySelector("#hide-contents").addEventListener('click', hideContents);
+        document.querySelector("#modal-screen").addEventListener('click', hideContents);
+        document.querySelector("#show-contents").addEventListener('click', showContents);
+    	
+    </script>
+</body>
+</html>
