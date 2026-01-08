@@ -3,7 +3,7 @@ title: XGBoost to Docker
 body-class: index-page
 ---
 
-![Monolithic App]({{URLROOT}}/shared/img/recommendation_system.png)
+![Monolithic App]({{URLROOT}}/shared/img/xgb_production.png)
 *[Photo by ChatGPT](https://chatgpt.com)*
 
 ## XGBoost to Docker
