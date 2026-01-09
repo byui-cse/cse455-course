@@ -3,7 +3,7 @@ title: NN to Docker
 body-class: index-page
 ---
 
-![Monolithic App]({{URLROOT}}/shared/img/nn_production.png)
+![Monolithic App]({{URLROOT}}/shared/img/nn_production.jpg)
 *[Photo by ChatGPT](https://chatgpt.com)*
 
 ## NN to Docker

@@ -36,4 +36,4 @@ For your convenience, links to each module overview is listed below, but please 
 Helpful modules
 
 * [XGBoost to Docker](./ice/xg-boost-production-example.html)
-* [XGBoost to Docker](./ice/nn-production-example.html)
+* [NN to Docker](./ice/nn-production-example.html)
