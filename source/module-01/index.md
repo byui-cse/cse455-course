@@ -79,7 +79,11 @@ Given items **A, B, C** in a cart, recommend items that are most frequently purc
 
 **Conditional Probability** What is the probability of A occuring given B already occured?
 
-Use [2016_01recommender_notebook_v3.ipynb](../course/data/cart/2016_01recommender_notebook_v3.ipynb) as a starting point. You can add whatever other models you would like to use. You will be responsible for figuring out how to deploy any models you pick.
+Open this example in Colab
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/byui-cse/cse455-course/blob/main/docs/course/data/cart/2016_01recommender_notebook_v3.ipynb){:target="_blank"}
+
+Use that notebook as a starting point. You can add whatever other models you would like to use. You will be responsible for figuring out how to deploy any models you pick.
 
 ---
 
