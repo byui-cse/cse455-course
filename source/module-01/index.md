@@ -123,6 +123,22 @@ Use that notebook as a starting point. You can add whatever other models you wou
 
 Customer behavior is **not stationary**. Products change, preferences shift, and recommendations can silently degrade.
 
+### Model Drift
+
+Our training data should accurately reflect the real-world data we expect when making predictions. If the data distribution changes over time, our models may become less accurate—a phenomenon known as **model drift**. Drift can occur **abruptly**, **gradually**, or **seasonally**, depending on how the underlying data or environment changes.
+
+There are different types of drift:
+
+* **Concept (Relationship) Drift** occurs when the underlying relationship between inputs and outputs changes. For example, customer preferences may shift, causing products that were once popular to fall out of favor.
+* **Data Drift** happens when the input data distribution changes, even if the relationship between inputs and outputs remains the same. Data drift can take two forms:
+
+    * **Input Drift:** The features change over time. For instance, new types of customers may have different purchasing behavior, or new products are added to the catalog that the model has never seen during training.
+    * **Output Drift:** The distribution of the target variable changes, even if the conditional relationship between features and the target remains constant. For example, the overall demand for a product category may increase or decrease over time.
+
+![Model Drift]({{URLROOT}}/shared/img/model_drift.png)
+
+**Impact of new products:** When new products are added, input drift occurs because these items introduce new feature combinations that the model was not trained on. If the model continues making predictions without retraining, its accuracy can degrade, especially for recommendations or sales forecasts involving these new items. Regular retraining with updated data ensures the model adapts to the expanded catalog.
+
 ---
 
 ### Task
@@ -196,7 +212,7 @@ Deploy your recommender as a production-style API.
 
 ### Requirements
 
-* Serialize model artifacts using **Pickle**
+* Serialize model artifacts using **Pickle** or **Joblib**
 * Package the system using **Docker**
 * Serve recommendations via an HTTP endpoint
 * Respond in under **500 ms**

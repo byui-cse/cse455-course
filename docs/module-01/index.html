@@ -45,6 +45,7 @@
 </li>
 <li><a href="#phase-2-changing-customer-behavior-over-time">Phase 2 – Changing Customer Behavior Over Time</a><ul>
 <li><a href="#business-question_1">Business Question</a></li>
+<li><a href="#model-drift">Model Drift</a></li>
 <li><a href="#task_1">Task</a></li>
 <li><a href="#deliverables-add-to-your-executive-summary_1">Deliverables (Add to your Executive Summary)</a></li>
 </ul>
@@ -193,6 +194,21 @@ Sequential recommendation, temporal modeling, cold start, product lifecycle, ret
 <p>“If we build a recommender today, how long will it stay accurate?”</p>
 </blockquote>
 <p>Customer behavior is <strong>not stationary</strong>. Products change, preferences shift, and recommendations can silently degrade.</p>
+<h3 id="model-drift">Model Drift</h3>
+<p>Our training data should accurately reflect the real-world data we expect when making predictions. If the data distribution changes over time, our models may become less accurate—a phenomenon known as <strong>model drift</strong>. Drift can occur <strong>abruptly</strong>, <strong>gradually</strong>, or <strong>seasonally</strong>, depending on how the underlying data or environment changes.</p>
+<p>There are different types of drift:</p>
+<ul>
+<li><strong>Concept (Relationship) Drift</strong> occurs when the underlying relationship between inputs and outputs changes. For example, customer preferences may shift, causing products that were once popular to fall out of favor.</li>
+<li>
+<p><strong>Data Drift</strong> happens when the input data distribution changes, even if the relationship between inputs and outputs remains the same. Data drift can take two forms:</p>
+<ul>
+<li><strong>Input Drift:</strong> The features change over time. For instance, new types of customers may have different purchasing behavior, or new products are added to the catalog that the model has never seen during training.</li>
+<li><strong>Output Drift:</strong> The distribution of the target variable changes, even if the conditional relationship between features and the target remains constant. For example, the overall demand for a product category may increase or decrease over time.</li>
+</ul>
+</li>
+</ul>
+<p><img alt="Model Drift" src="https://byui-cse.github.io/cse455-course/shared/img/model_drift.png" /></p>
+<p><strong>Impact of new products:</strong> When new products are added, input drift occurs because these items introduce new feature combinations that the model was not trained on. If the model continues making predictions without retraining, its accuracy can degrade, especially for recommendations or sales forecasts involving these new items. Regular retraining with updated data ensures the model adapts to the expanded catalog.</p>
 <hr />
 <h3 id="task_1">Task</h3>
 <ul>
@@ -259,7 +275,7 @@ Sequential recommendation, temporal modeling, cold start, product lifecycle, ret
 <hr />
 <h3 id="requirements_1">Requirements</h3>
 <ul>
-<li>Serialize model artifacts using <strong>Pickle</strong></li>
+<li>Serialize model artifacts using <strong>Pickle</strong> or <strong>Joblib</strong></li>
 <li>Package the system using <strong>Docker</strong></li>
 <li>Serve recommendations via an HTTP endpoint</li>
 <li>Respond in under <strong>500 ms</strong></li>
