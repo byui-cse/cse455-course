@@ -326,7 +326,7 @@ Design an automation strategy for:
 * Updating discontinued and out-of-stock lists
 * Safely deploying updated models
 
-Use the [cart_export_19_05.csv](../course/data/cart/cart_export_15_05.csv) data for the remainder of the questions.
+Use the [cart_export_19_05.csv](../course/data/cart/cart_export_19_05.csv) data for the remainder of the questions.
 Use the [discontinued.json](../course/data/cart/discontinued.json), [new_items.json](../course/data/cart/new_items.json), [out_of_stock.json](../course/data/cart/out_of_stock.json), and [special_items.json](../course/data/cart/special_items.json) files in your system. You'll need to update those files to work with your system. These files are generated nightly. 
 
 You can request access to the cart history based on your analysis, but each report takes ~ four hours to create and costs the business between 1.21 and 4.53 dollars in compute each time the report is created.
