@@ -110,20 +110,18 @@ Analyze the physical setup:
 * Import provided video files into [https://app.cvat.ai/](https://app.cvat.ai/)
 * Extract frames for labeling
 * Label candies by **color class**
-	* Skittles
-		* Purple
-		* Orange
-		* Yellow
-		* Red
-		* Green
-	* M&Ms
-		* Brown
-		* Blue
-		* Orange
-		* Yellow
-		* Red
-		* Green
-	* (For this exercise, we'll group Purple Skittles and Brown M&Ms together)
+	* Blue
+		* Blue M&Ms
+	* Brown
+		* Brown M&Ms and Purple Skittles
+	* Orange
+		* Orange M&Ms and Orange Skittles
+	* Red
+		* Red M&Ms and Red Skittles
+	* Green
+		* Green M&Ms and Green Skittles
+	* Yellow
+		* Yellow M&Ms and Yellow Skittles
 * Export annotations in a YOLO-compatible format
 
 ![Skittles vs M&Ms]({{URLROOT}}/shared/img/mnm_skittles.jpg)

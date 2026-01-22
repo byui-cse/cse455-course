@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Deploy docker to AWS</title>
+    <style>
+        @font-face {
+            font-family: 'icomoon';
+            src: url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.eot');
+            src: url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.eot#iefix-8k8p81') format('embedded-opentype'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.ttf') format('truetype'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.woff') format('woff'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.svg#icomoon') format('svg');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/reset.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/fonts/fontawesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/highlight/styles/monokai-sublime.min.css">
+	<link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/main.css?v1.4">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">    
+    <meta charset="utf-8">
+
+</head>
+<body class="index-page">
+     <div id="modal-screen">
+        <div id="contents-wrapper">
+            <div class="toc">
+<ul>
+<li><a href="#deploy-docker-to-aws">Deploy Docker to AWS</a><ul>
+<li><a href="#install-aws-cli">Install AWS CLI</a></li>
+<li><a href="#update-the-credentials">Update the credentials</a></li>
+</ul>
+</li>
+<li><a href="#create-the-container-registry">Create the container registry</a><ul>
+<li><a href="#create-an-ecs">Create an ECS</a><ul>
+<li><a href="#create-a-cluster">Create a cluster</a></li>
+<li><a href="#create-a-task-definition">Create a task definition</a></li>
+</ul>
+</li>
+<li><a href="#deploy-the-containers">Deploy the containers</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+            <a href="#" id="hide-contents" title="Close Table of Contents"><i class="far fa-window-close"></i></a>
+        </div>
+    </div>
+	<header>
+        <span class="icon-byui-logo"></span>
+        <div id="titles">
+            <h1>CSE 455 - Developing AI Systems</h1>
+            <h2>Deploy docker to AWS</h2>
+            <nav><a href="https://byui-cse.github.io/cse455-course"><i class="fas fa-home"></i></a><a href="https://byui-cse.github.io/cse455-course/module-01/">Module 1</a><a href="https://byui-cse.github.io/cse455-course/module-02/">Module 2</a><a href="https://byui-cse.github.io/cse455-course/module-03/">Module 3 - 6</a></nav>
+        </div>
+        <a href="#" id="show-contents" title="Show Table of Contents"><i class="far fa-list-alt"></i></a>
+    </header>
+	<article>
+		<h2 id="deploy-docker-to-aws">Deploy Docker to AWS</h2>
+<h3 id="install-aws-cli">Install AWS CLI</h3>
+<p>You'll need to install the AWS CLI to be able to push to AWS</p>
+<p>Use this link to download the CLI</p>
+<p>https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html</p>
+<h3 id="update-the-credentials">Update the credentials</h3>
+<p>You'll need the following information to complete the configuration (If you disconnect from the AWS Learner Lab, you'll need to complete these steps again)</p>
+<ul>
+<li>Click on the tab where you opened the AWS Lab</li>
+<li>Click on <strong>i</strong> AWS Details</li>
+<li>Click on Show next to AWS CLI:</li>
+<li>Copy the contents of that box starting at the beginning of [default]. It should have the access key id, the secret access key and the token</li>
+</ul>
+<p><img alt="AWS CLI access key" src="https://byui-cse.github.io/cse455-course/shared/img/aws-cli-example.jpg" /></p>
+<ul>
+<li>You'll paste these pieces of information into the questions asked by the following command</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>aws configure
+</code></pre></div>
+
+<p>Verify your AWS CLI Authentication1</p>
+<div class="codehilite"><pre><span></span><code>aws sts get-caller-identity
+</code></pre></div>
+
+<p>You should get something like this in return:</p>
+<div class="results">
+{
+    "UserId": "AROAIEXAMPLEID",
+    "Account": "123456789012",
+    "Arn": "arn:aws:sts::123456789012:assumed-role/RoleName/RoleSessionName"
+}
+</div>
+
+<h1 id="create-the-container-registry">Create the container registry</h1>
+<p><span class="material-symbols-outlined">search</span> Search for ECR which will bring up Elastic Container Registry. Open this in a new tab.</p>
+<ul>
+<li><span class="amz-orange-button">Create repository</span></li>
+<li>Repository name: recommender-app</li>
+<li><span class="amz-orange-button">Create repository</span></li>
+<li>Click on <span class="amz-link">recommender-app</span></li>
+<li><span class="amz-white-button">View push commands</span></li>
+<li>Copy the 4 commands and run them in your EC2 terminal. </li>
+</ul>
+<p>The commands should look something like this (don't use the commands below, COPY from the PUSH COMMANDS for your specific repository)</p>
+<p><img alt="Docker Commands" src="https://byui-cse.github.io/cse455-course/shared/img/docker-commands.jpg" /></p>
+<p>You should receive a response that shows the docker container was pushed to the ECR.</p>
+<p>Go back to the ECR tab and click <span class="amz-white-button">Close</span></p>
+<ul>
+<li>Click the <span class="amz-white-button"><span class="material-symbols-outlined">
+refresh
+</span></span> button.</li>
+</ul>
+<p>You should see 1 image with a tag of latest in the list.</p>
+<p><img alt="Docker container uploaded to ecr" src="https://byui-cse.github.io/cse455-course/shared/img/ecr-uploaded.jpg" /></p>
+<div class="admonition note">
+<p class="admonition-title">Image URI</p>
+<p>You'll need the Image URI for this image later in the lab.</p>
+</div>
+<h2 id="create-an-ecs">Create an ECS</h2>
+<ul>
+<li>Search for ECS and open the Elastic Container Service in a new tab</li>
+</ul>
+<h3 id="create-a-cluster">Create a cluster</h3>
+<ul>
+<li><span class="amz-orange-button">Create cluster</span></li>
+<li>Cluster name: <strong>RecommenderCluster</strong></li>
+<li>Use fargate</li>
+<li><span class="amz-orange-button">Create</span></li>
+<li>Wait for the cluster to create</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Cluster</p>
+<p>Occassionally the learner lab will fail to build the cluster. </p>
+<p>You can go to cloudformation and rerun the build.</p>
+<p>If that fails, create a second cluster and call it RecommenderCluster2 and use it instead.</p>
+</div>
+<h3 id="create-a-task-definition">Create a task definition</h3>
+<ul>
+<li>Click <span class='amz-white-button'>Task definitions</span> on the left-hand column</li>
+<li>Click <span class="amz-orange-button">Create new task definition <span class="material-symbols-outlined">
+arrow_drop_down
+</span></span> <span class="amz-white-button">Create new task definition</span></li>
+<li>Task definition family: <strong>RecommenderSystem</strong></li>
+<li>Launch Type: Fargate</li>
+<li>CPU: .25 vCPU</li>
+<li>Memory: 1 GB</li>
+<li>Task role: LabRole</li>
+<li>Task execution role: LabRole</li>
+</ul>
+<p>Under Container-1</p>
+<ul>
+<li>Name: recommender-container</li>
+<li>Image URI: paste in the URI from the ECR Image URI</li>
+<li><span class="amz-oranage-button">Create</span></li>
+</ul>
+<h2 id="deploy-the-containers">Deploy the containers</h2>
+<ul>
+<li><span class="amz-white-button">Deploy </span> <span class="amz-white-button">Create service</span></li>
+<li>Exisiting cluster: RecommenderCluster</li>
+<li>Under Deployment configuration<ul>
+<li>Service Name: RecommenderAppService</li>
+</ul>
+</li>
+</ul>
+<!-- * Under Networking
+    * VPC: vehicleapp-vpc
+    * remove the private subnets
+    * Exisiting Security Group: Add vehicle-sg and remove the default one -->
+<ul>
+<li>Under Load balancing<ul>
+<li>Load balancer type: Application Load Balancer</li>
+<li>Load balancer name: <strong>RecommenderLoadBalancer</strong></li>
+</ul>
+</li>
+<li>Under Service auto scaling<ul>
+<li>Check Use service auto scaling</li>
+<li>Minimum number of tasks: 1</li>
+<li>Maximum number of tasks: 3</li>
+<li>Policy Name: Recommender CPU usage</li>
+<li>ECS service metric: ECSServiceAverageCPUUtilization</li>
+<li>Target value 70 (these look like they already have values, you need to TYPE them in)</li>
+<li>Scale-out: 300</li>
+<li>Scale-in: 300</li>
+</ul>
+</li>
+<li><span class="amz-orange-button">Create</span></li>
+<li>Wait for the deployment to start</li>
+<li>Click the <span class="amz-white-button"><span class="material-symbols-outlined">
+refresh
+</span></span> button under Services.</li>
+</ul>
+<p>You will see 1/1 Tasks running </p>
+<ul>
+<li>Click on <span class="amz-link">RecommenderAppService</span></li>
+<li>Click on <span class="amz-white-button">View load balancer <span class="material-symbols-outlined">
+open_in_new
+</span></span></li>
+</ul>
+<p>Copy the DNS name for the load balancer and paste it into a new tab.</p>
+<p>You will see your app running in a container on your load balancer. If we received enough traffic, the app would auto scale up to 3 containers for us.</p>
+<p>Test the endpoint by curling the new endpoint you have created.</p>
+	</article>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/highlight/highlight.pack.js"></script>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.js"></script>
+    <script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/contrib/auto-render.min.js"></script>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/smartquotes/smartquotes.min.js"></script>
+    <script src="https://byui-cse.github.io/cse455-course/shared/lib/copy/copy.js"></script>
+    <script>
+
+        /* Startup scripts for katex rendering */
+    	renderMathInElement(document.body,
+		{
+			delimiters: [
+				{left: "$$", right: "$$", display: true},
+				{left: "$", right: "$", display: false},
+			]
+    	});
+
+        /* Highlighting code */
+    	hljs.initHighlightingOnLoad();
+    	var elements = document.querySelectorAll('.language-text')
+		for (var i = 0; i < elements.length; i++) {
+  			elements[i].classList.add('hljs');
+		}
+
+        /* TOC support */
+        var hideContents = function(e){
+            console.log(e.target);
+            if(e.target.id === 'modal-screen' || e.target.nodeName.toLowerCase() === 'i') {
+                e.preventDefault();
+                document.querySelector('#contents-wrapper').classList.remove('active');
+                document.querySelector('#modal-screen').classList.remove('active');
+            }
+        }
+
+        var showContents = function(e){
+            e.preventDefault();
+            document.querySelector('#contents-wrapper').classList.add('active');
+            document.querySelector('#modal-screen').classList.add('active');
+        }
+
+        document.querySelector("#hide-contents").addEventListener('click', hideContents);
+        document.querySelector("#modal-screen").addEventListener('click', hideContents);
+        document.querySelector("#show-contents").addEventListener('click', showContents);
+    	
+    </script>
+</body>
+</html>

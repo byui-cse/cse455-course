@@ -349,6 +349,38 @@ article .dialogue blockquote em{
   margin: 0 0 10px 0;
 }
 
+.results {
+	background: black;
+	color: white;
+	font-family: Menlo, Monoco, Consolas, monospace;
+	font-size: 14px;
+	padding: 20px;
+	box-sizing: border-box;
+	line-height: 1.6em;
+	white-space: pre-wrap;
+}
+
+.amz-orange-button {
+	display: inline-block;
+	background-color: #ff9900;
+	padding: 7px 12px;
+	color: black;
+	font-weight: bold;
+	font-family: "Open Sans", sans-serif;
+	font-size: 14px;
+}
+.amz-white-button {
+	border: solid 1px #94989e;
+	border-radius: 3px;
+	padding: 7px 12px;
+	color: #545b64;
+	font-weight: bold;
+	font-family: "Open Sans", sans-serif;
+	font-size: 14px;
+	display: inline-block;
+	background-color: white;
+}
+
 .note { background-color: var(--note-background-color); }
 .def { background-color: var(--definition-background-color); }
 .warning { background-color: var(--warning-background-color); }
