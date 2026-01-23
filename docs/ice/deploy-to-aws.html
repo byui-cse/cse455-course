@@ -63,7 +63,7 @@
 <h3 id="install-aws-cli">Install AWS CLI</h3>
 <p>You'll need to install the AWS CLI to be able to push to AWS</p>
 <p>Use this link to download the CLI</p>
-<p>https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html</p>
+<p><a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html">https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html</a></p>
 <h3 id="update-the-credentials">Update the credentials</h3>
 <p>You'll need the following information to complete the configuration (If you disconnect from the AWS Learner Lab, you'll need to complete these steps again)</p>
 <ul>
@@ -74,7 +74,7 @@
 </ul>
 <p><img alt="AWS CLI access key" src="https://byui-cse.github.io/cse455-course/shared/img/aws-cli-example.jpg" /></p>
 <ul>
-<li>You'll paste these pieces of information into the questions asked by the following command</li>
+<li>You'll paste these pieces of information into .aws/credentials file. Then run this command:</li>
 </ul>
 <div class="codehilite"><pre><span></span><code>aws configure
 </code></pre></div>
@@ -92,8 +92,9 @@
 }
 </div>
 
+<p>Start up <strong>Docker Desktop</strong></p>
 <h1 id="create-the-container-registry">Create the container registry</h1>
-<p><span class="material-symbols-outlined">search</span> Search for ECR which will bring up Elastic Container Registry. Open this in a new tab.</p>
+<p>On AWS, with your leaner lab started, <span class="material-symbols-outlined">search</span>Search for ECR which will bring up Elastic Container Registry. Open this in a new tab.</p>
 <ul>
 <li><span class="amz-orange-button">Create repository</span></li>
 <li>Repository name: recommender-app</li>

@@ -11,7 +11,7 @@ You'll need to install the AWS CLI to be able to push to AWS
 
 Use this link to download the CLI
 
-https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+[https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 
 ### Update the credentials
 
@@ -25,7 +25,7 @@ You'll need the following information to complete the configuration (If you disc
 
 ![AWS CLI access key]({{URLROOT}}/shared/img/aws-cli-example.jpg)
 
-* You'll paste these pieces of information into the questions asked by the following command
+* You'll paste these pieces of information into .aws/credentials file. Then run this command:
 
 ```
 aws configure
@@ -47,9 +47,11 @@ You should get something like this in return:
 }
 </div>
 
+Start up **Docker Desktop**
+
 # Create the container registry
 
-<span class="material-symbols-outlined">search</span> Search for ECR which will bring up Elastic Container Registry. Open this in a new tab.
+On AWS, with your leaner lab started, <span class="material-symbols-outlined">search</span>Search for ECR which will bring up Elastic Container Registry. Open this in a new tab.
 
 * <span class="amz-orange-button">Create repository</span>
 * Repository name: recommender-app
