@@ -35,6 +35,7 @@
 </ul>
 </li>
 <li><a href="#create-the-container-registry">Create the container registry</a><ul>
+<li><a href="#update-security-group">Update security group</a></li>
 <li><a href="#create-an-ecs">Create an ECS</a><ul>
 <li><a href="#create-a-cluster">Create a cluster</a></li>
 <li><a href="#create-a-task-definition">Create a task definition</a></li>
@@ -118,6 +119,25 @@ refresh
 <p class="admonition-title">Image URI</p>
 <p>You'll need the Image URI for this image later in the lab.</p>
 </div>
+<h2 id="update-security-group">Update security group</h2>
+<ul>
+<li>
+<p>Search for EC2 in the AWS search bar</p>
+</li>
+<li>
+<p>Click on <strong>Security Groups</strong> on the left</p>
+</li>
+<li>Click on the Security Group ID (mine looked something like sg-062afafafaf0302)</li>
+<li>Click <strong>Edit inboud rules</strong></li>
+<li>Add a rule<ul>
+<li>Type: Custom TCP</li>
+<li>Port Range: 8080 or whatever your container port was </li>
+<li>Source: Custom</li>
+<li>0.0.0.0</li>
+</ul>
+</li>
+<li>Save rules</li>
+</ul>
 <h2 id="create-an-ecs">Create an ECS</h2>
 <ul>
 <li>Search for ECS and open the Elastic Container Service in a new tab</li>

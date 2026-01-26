@@ -37,3 +37,4 @@ Helpful modules
 
 * [XGBoost to Docker](./ice/xg-boost-production-example.html)
 * [NN to Docker](./ice/nn-production-example.html)
+* [Deploy to AWS](./ice/deploy-to-aws.html)

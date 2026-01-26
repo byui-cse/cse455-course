@@ -80,6 +80,20 @@ You should see 1 image with a tag of latest in the list.
 
     You'll need the Image URI for this image later in the lab.
 
+## Update security group
+
+* Search for EC2 in the AWS search bar
+
+* Click on **Security Groups** on the left
+* Click on the Security Group ID (mine looked something like sg-062afafafaf0302)
+* Click **Edit inboud rules**
+* Add a rule
+    * Type: Custom TCP
+    * Port Range: 8080 or whatever your container port was 
+    * Source: Custom
+    * 0.0.0.0
+* Save rules
+
 ## Create an ECS
 
 * Search for ECS and open the Elastic Container Service in a new tab
