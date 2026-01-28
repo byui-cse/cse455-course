@@ -133,7 +133,7 @@ refresh
 <li>Type: Custom TCP</li>
 <li>Port Range: 8080 or whatever your container port was </li>
 <li>Source: Custom</li>
-<li>0.0.0.0</li>
+<li>0.0.0.0/0</li>
 </ul>
 </li>
 <li>Save rules</li>
@@ -163,9 +163,10 @@ refresh
 arrow_drop_down
 </span></span> <span class="amz-white-button">Create new task definition</span></li>
 <li>Task definition family: <strong>RecommenderSystem</strong></li>
+<li><strong>MAC USERS</strong> If you are on an ARM system, make sure you select <strong>Operating system/Architecture</strong> options and choose Linux/ARM64 instead.</li>
 <li>Launch Type: Fargate</li>
-<li>CPU: .25 vCPU</li>
-<li>Memory: 1 GB</li>
+<li>CPU: 1 vCPU</li>
+<li>Memory: 3 GB</li>
 <li>Task role: LabRole</li>
 <li>Task execution role: LabRole</li>
 </ul>
@@ -173,6 +174,7 @@ arrow_drop_down
 <ul>
 <li>Name: recommender-container</li>
 <li>Image URI: paste in the URI from the ECR Image URI</li>
+<li>Port mappings: Set the container port to the port your app is running on. ie 8080, 5000, 5001</li>
 <li><span class="amz-oranage-button">Create</span></li>
 </ul>
 <h2 id="deploy-the-containers">Deploy the containers</h2>

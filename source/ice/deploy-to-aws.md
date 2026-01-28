@@ -91,7 +91,7 @@ You should see 1 image with a tag of latest in the list.
     * Type: Custom TCP
     * Port Range: 8080 or whatever your container port was 
     * Source: Custom
-    * 0.0.0.0
+    * 0.0.0.0/0
 * Save rules
 
 ## Create an ECS
@@ -121,9 +121,10 @@ You should see 1 image with a tag of latest in the list.
 arrow_drop_down
 </span></span> <span class="amz-white-button">Create new task definition</span>
 * Task definition family: **RecommenderSystem**
+* **MAC USERS** If you are on an ARM system, make sure you select **Operating system/Architecture** options and choose Linux/ARM64 instead.
 * Launch Type: Fargate
-* CPU: .25 vCPU
-* Memory: 1 GB
+* CPU: 1 vCPU
+* Memory: 3 GB
 * Task role: LabRole
 * Task execution role: LabRole
 
@@ -131,6 +132,7 @@ Under Container-1
 
 * Name: recommender-container
 * Image URI: paste in the URI from the ECR Image URI
+* Port mappings: Set the container port to the port your app is running on. ie 8080, 5000, 5001
 * <span class="amz-oranage-button">Create</span>
 
 ## Deploy the containers
