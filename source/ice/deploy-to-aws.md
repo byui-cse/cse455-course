@@ -175,3 +175,7 @@ Copy the DNS name for the load balancer and paste it into a new tab.
 You will see your app running in a container on your load balancer. If we received enough traffic, the app would auto scale up to 3 containers for us.
 
 Test the endpoint by curling the new endpoint you have created.
+
+curl -X POST http://YOURLOADBALANCERDNS:8000/predict -H "Content-Type: application/json" -d '{ "cart": ["240", "200", "277", "78"], "top_n": 10 }'
+
+**You may need to replace 8000 with your port number and /predict with your endpoint name that you used in your app.py file.
