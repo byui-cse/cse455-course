@@ -16,4 +16,4 @@ body-class: index-page
 ### DOCKER
 
 * Read the [Docker Tutorial](https://docs.docker.com/get-started/docker-overview)
-* Complete the [XGBoost to Docker](./ice/xg-boost-production-example.html)
+* Complete the [XGBoost to Docker](../ice/xg-boost-production-example.html)
