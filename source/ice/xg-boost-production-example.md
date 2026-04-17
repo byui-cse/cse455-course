@@ -47,114 +47,166 @@ Copy the following into the `Dockerfile` (notice that this file doesn't have an 
 FROM python:3.11-slim
 WORKDIR /app
 
-# Install system deps for xgboost if needed (kept minimal)
 RUN apt-get update && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application files and model artifacts (ensure these exist in build context)
 COPY . /app
 
-EXPOSE 5000
-# Use gunicorn for production; fallback to Flask dev server if not installed
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app.app:app"]
+EXPOSE 8000
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
 Copy this into the `requirements.txt` file:
 
 ```
-flask
-gunicorn
+fastapi
+unicorn
 pandas
 xgboost
 scikit-learn==1.5.2
 joblib
+pydantic
 ```
 
-Next copy this into the app.py file:
+Next copy this into the main.py file:
 
 ```
-from flask import Flask, request, jsonify
-import pandas as pd
+from fastapi import FastAPI
+from .router import router as process_router
+
+app = FastAPI()
+app.include_router(process_router)
+```
+
+Copy this into the router.py file:
+```
+from fastapi import APIRouter
+from . import endpoint
+
+router = APIRouter()
+router.include_router(endpoint.router, prefix="/mpg", tags=["mpg"])
+```
+
+And finally this into the endpoint.py file:
+```
 import json
+from http import HTTPStatus
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
+from starlette.responses import Response
+from typing import Optional, Union, List
+import pandas as pd
 from joblib import load
 from pathlib import Path
 
-app = Flask(__name__)
+router = APIRouter()
 
 # Load model and feature list at startup
 CURRENT_VERSION_PATH = Path('models/v1')
 MODEL_PATH = CURRENT_VERSION_PATH / 'model.joblib'
 FEATURES_PATH = CURRENT_VERSION_PATH / 'feature_names.json'
 
-# Load the model
 model = load(MODEL_PATH)
 
-# Load expected features
 with open(FEATURES_PATH, 'r') as f:
     expected_features = json.load(f)
 
 
-def preprocess_for_prod_from_json(payload):
-    if isinstance(payload, dict):
-        records = [payload]
-    else:
-        records = payload    
-    df = pd.DataFrame(records)
+class CarSchema(BaseModel):
+    """Schema for a single car record."""
+
+    cylinders: Optional[int] = Field(None, description="Number of cylinders", example=8)
+    displacement: Optional[float] = Field(None, description="Engine displacement", example=307.0)
+    acceleration: Optional[float] = Field(None, description="Time to accelerate (seconds)", example=12.0)
+    weight: Optional[float] = Field(None, description="Vehicle weight (lbs)", example=3504.0)
+    horsepower: Optional[float] = Field(None, description="Engine horsepower", example=130.0)
+    year: Optional[int] = Field(None, description="Model year", example=75)
+    origin: Optional[int] = Field(None, description="Origin (1=USA, 2=Europe, 3=Japan)", example=1)
+    name: Optional[str] = Field(None, description="Car name", example="chevy ltd")
+
+
+class PredictionInput(BaseModel):
+    data: Union[CarSchema, List[CarSchema]] = Field(
+        ..., description="A single car record or a list of car records"
+    )
+
     
+
+
+def preprocess_for_prod_from_json(payload):
+    if isinstance(payload, list):
+        records = [item.model_dump(exclude_none=True) for item in payload]
+    else:
+        records = [payload.model_dump(exclude_none=True)]
+
+    df = pd.DataFrame(records)
+
     # --- Numeric preprocessing ---
     if 'horsepower' in df.columns:
         df['horsepower'] = df['horsepower'].replace('?', 0).astype(float)
-    
+
     # --- Categorical preprocessing ---
     if 'origin' in df.columns:
         df['origin'] = df['origin'].map({1: 'USA', 2: 'Europe', 3: 'Japan'}).fillna('Unknown')
+
     if 'name' in df.columns:
         df['maker'] = df['name'].astype(str).str.split(' ').str[0]
     else:
         df['maker'] = 'Unknown'
-    
+
     # --- One-hot encoding ---
     origin_dummies = pd.get_dummies(df['origin'], prefix='', prefix_sep='') if 'origin' in df.columns else pd.DataFrame(index=df.index)
     maker_dummies = pd.get_dummies(df[['maker']]) if 'maker' in df.columns else pd.DataFrame(index=df.index)
-    
-    # --- Combine numeric + dummies ---
+
+    # --- Combine ---
     numeric_cols = [c for c in ['cylinders','displacement','acceleration','weight','horsepower','year'] if c in df.columns]
     Xcand = pd.concat([df[numeric_cols], origin_dummies, maker_dummies], axis=1)
-    
-  
-    # Add missing columns
+
+    # Align columns
     for col in expected_features:
         if col not in Xcand.columns:
             Xcand[col] = 0
-    # Keep only expected columns in order
+
     Xcand = Xcand[expected_features]
-    
+
     return Xcand
 
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    payload = request.get_json()
-    if payload is None:
-        return jsonify({'error': 'Invalid or missing JSON payload'}), 400
+@router.post("/predict")
+async def predict(input_data: PredictionInput) -> Response:
     try:
-        Xp = preprocess_for_prod_from_json(payload)
+        Xp = preprocess_for_prod_from_json(input_data.data)
         preds = model.predict(Xp)
-        return jsonify({'predictions': preds.tolist()})
+        return Response(
+            content=json.dumps({"predictions": preds.tolist()}),
+            status_code=HTTPStatus.OK,
+            media_type="application/json",
+        )
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.route('/health', methods=['GET'])
-def health():
-    return jsonify({'status': 'ok'})
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+@router.get("/health")
+async def health() -> Response:
+    return Response(
+        content=json.dumps({"status": "ok"}),
+        status_code=HTTPStatus.OK,
+        media_type="application/json",
+    )
 ```
+
+### Test your app
+
+You can test your app with this code:
+```
+cd deploy
+uvicorn app.main:app --port 8000
+```
+
 
 Run this command to build the container. Make sure you are in the folder with the Dockerfile 
 
@@ -165,17 +217,33 @@ Run this command to build the container. Make sure you are in the folder with th
     Make sure you have Docker Desktop running.
 
 ```
-docker build -t xgb-flask .
+docker build -t xgb-fastapi .
 ```
 
 Then let's run it locally
 
 ```
-docker run --rm -p 5000:5000 xgb-flask 
+docker run --rm -p 8000:8000 xgb-fastapi 
 ```
-You can test your code from `git bash` or the `terminal`
 
-```
-curl -X POST http://localhost:5000/predict -H "Content-Type: application/json" -d '{"cylinders":8,"displacement":307,"acceleration":12,"weight":3504,"horsepower":130,"year":75,"origin":5,"name":"chevy ltd"}'
-```
+
+You can test your container by going to this address and clicking on mpg/health and "Try it out" -> Execute.
+
+
+[http://localhost:8000/docs](http://localhost:8000/docs)
+
+!!! note "docs"
+
+    FastApi automatically creates swagger docs for your endpoint.
+
+
+Your endpoints should be 
+
+[http://localhost:8000/mpg/health](http://localhost:8000/mpg/health)
+
+and
+
+[http://localhost:8000/mpg/predict](http://localhost:8000/mpg/predict)
+
+
 

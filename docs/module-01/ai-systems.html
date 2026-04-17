@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Course Index</title>
+	<title>Module 01: AI Systems</title>
     <style>
         @font-face {
             font-family: 'icomoon';
@@ -29,8 +29,10 @@
         <div id="contents-wrapper">
             <div class="toc">
 <ul>
-<li><a href="#cse-455-course-index">CSE 455 - Course Index</a></li>
-<li><a href="#module-links">Module Links</a></li>
+<li><a href="#module-01-ai-systems">Module 01 – AI Systems</a><ul>
+<li><a href="#traditional-software">Traditional software</a></li>
+</ul>
+</li>
 </ul>
 </div>
 
@@ -41,40 +43,37 @@
         <span class="icon-byui-logo"></span>
         <div id="titles">
             <h1>CSE 455 - Developing AI Systems</h1>
-            <h2>Course Index</h2>
+            <h2>Module 01: AI Systems</h2>
             <nav><a href="https://byui-cse.github.io/cse455-course"><i class="fas fa-home"></i></a><a href="https://byui-cse.github.io/cse455-course/prep-module/">Prep Module</a><a href="https://byui-cse.github.io/cse455-course/module-01/">Module 1</a><a href="https://byui-cse.github.io/cse455-course/module-02/">Module 2</a><a href="https://byui-cse.github.io/cse455-course/module-03/">Module 3 - 6</a></nav>
         </div>
         <a href="#" id="show-contents" title="Show Table of Contents"><i class="far fa-list-alt"></i></a>
     </header>
 	<article>
-		<!-- ![Technology Product Development](https://byui-cse.github.io/cse455-course/shared/img/technology-product-development-hero.jpg)
-*[Photo by Dall-E-3](https://openai.com/dall-e-3)* -->
+		<!-- ![Monolithic App](https://byui-cse.github.io/cse455-course/shared/img/recommendation_system.png)
+*[Photo by ChatGPT](https://chatgpt.com)* -->
 
-<!-- ![From Idea to Product](https://byui-cse.github.io/cse455-course/shared/img/x99-hero.jpg)
-
-Let’s make something the world hasn’t seen yet. -->
-
-<h2 id="cse-455-course-index">CSE 455 - Course Index</h2>
-<p>This course prepares you to use AI in industry.</p>
-<p>Building on previous experience with machine learning modeling, you will learn to design and implement end-to-end AI systems. You will learn to deploy these systems into working environments and monitor them for iterative improvement.  </p>
-<p>This is a handy index page for the course content of CSE 455. This content is subject to change without notice and is for informational purposes only. </p>
-<p>If you're a student, the content, assignments, and deadlines you'll be responsible for are those linked to from I-Learn.</p>
-<ul>
-<li><a href="./course/syllabus.html">Course Syllabus</a></li>
-</ul>
-<h2 id="module-links">Module Links</h2>
-<p>For your convenience, links to each module overview is listed below, but please remember that the assignments listed in your Canvas session by your instructor are the final word on what is actually due on a given day:</p>
-<ul>
-<li><a href="./module-01/">Module 01</a></li>
-<li><a href="./module-02/">Module 02</a></li>
-<li><a href="./module-03/">Module 03</a></li>
-</ul>
-<p>Helpful modules</p>
-<ul>
-<li><a href="./ice/xg-boost-production-example.html">XGBoost to Docker</a></li>
-<li><a href="./ice/nn-production-example.html">NN to Docker</a></li>
-<li><a href="./ice/deploy-to-aws.html">Deploy to AWS</a></li>
-</ul>
+<h2 id="module-01-ai-systems">Module 01 – AI Systems</h2>
+<p>1) Learning-Based Logic: </p>
+<h3 id="traditional-software">Traditional software</h3>
+<p>Input -&gt; Process -&gt; Output</p>
+<p>AI Systems</p>
+<p>You're not just writing algorithms. You're designing systems that manage flow of information to and from models while handling the unpredictablitiy of nondeterministic AI outputs.</p>
+<p>Input -&gt; Process -&gt; Output -&gt; Feedback -|
+^---------------------------------------|
+This can require multiple loops or even breaks in the loops for humans to intervene or review.</p>
+<p>Save Everything with context
+- Log every raw event output, error, and user feedback as permanent records. Store models, timestamps, and settings
+Run production locally
+- Be able to run the pipeline to simulate behavior
+Create Feedback Loops
+- Retrieve raw event -&gt; run it locally -&gt; fix it -&gt; write a test -&gt; deploy2
+Track All Changes
+- Save versions of prompts and models. Version everything. Store model with logs to know what version was running
+Test for output quality
+- Review for output quality. See if they meet standards and compare against previous versions</p>
+<p>https://fastapi.tiangolo.com/tutorial/</p>
+<p><img alt="alt text" src="image.png" /></p>
+<p><img alt="alt text" src="image-1.png" /> FIX THIS</p>
 	</article>
 	<script src="https://byui-cse.github.io/cse455-course/shared/lib/highlight/highlight.pack.js"></script>
 	<script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.js"></script>

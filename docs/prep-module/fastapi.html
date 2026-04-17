@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Module Prep: Fast API</title>
+    <style>
+        @font-face {
+            font-family: 'icomoon';
+            src: url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.eot');
+            src: url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.eot#iefix-8k8p81') format('embedded-opentype'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.ttf') format('truetype'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.woff') format('woff'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.svg#icomoon') format('svg');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/reset.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/fonts/fontawesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/highlight/styles/monokai-sublime.min.css">
+	<link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/main.css?v1.4">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">    
+    <meta charset="utf-8">
+
+</head>
+<body class="index-page">
+     <div id="modal-screen">
+        <div id="contents-wrapper">
+            <div class="toc">
+<ul>
+<li><a href="#fastapi-for-ai-applications">FastAPI for AI Applications</a><ul>
+<li><a href="#what-is-fastapi">What is FastAPI?</a><ul>
+<li><a href="#why-fastapi-for-ai-engineering">Why FastAPI for AI Engineering?</a></li>
+</ul>
+</li>
+<li><a href="#learn-more">Learn More</a><ul>
+<li><a href="#about-uvicorn">About Uvicorn</a></li>
+<li><a href="#default-port">Default Port</a></li>
+</ul>
+</li>
+<li><a href="#structure">Structure</a></li>
+<li><a href="#code-walkthrough">Code Walkthrough</a><ul>
+<li><a href="#1-mainpy-application-entry-point">1. main.py - Application Entry Point</a></li>
+<li><a href="#2-routerpy-request-routing">2. router.py - Request Routing</a></li>
+<li><a href="#3-endpointpy-core-logic">3. endpoint.py - Core Logic</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+            <a href="#" id="hide-contents" title="Close Table of Contents"><i class="far fa-window-close"></i></a>
+        </div>
+    </div>
+	<header>
+        <span class="icon-byui-logo"></span>
+        <div id="titles">
+            <h1>CSE 455 - Developing AI Systems</h1>
+            <h2>Module Prep: Fast API</h2>
+            <nav><a href="https://byui-cse.github.io/cse455-course"><i class="fas fa-home"></i></a><a href="https://byui-cse.github.io/cse455-course/prep-module/">Prep Module</a><a href="https://byui-cse.github.io/cse455-course/module-01/">Module 1</a><a href="https://byui-cse.github.io/cse455-course/module-02/">Module 2</a><a href="https://byui-cse.github.io/cse455-course/module-03/">Module 3 - 6</a></nav>
+        </div>
+        <a href="#" id="show-contents" title="Show Table of Contents"><i class="far fa-list-alt"></i></a>
+    </header>
+	<article>
+		<h1 id="fastapi-for-ai-applications">FastAPI for AI Applications</h1>
+<h2 id="what-is-fastapi">What is FastAPI?</h2>
+<p><a href="https://fastapi.tiangolo.com/">FastAPI</a> is a modern, high-performance web framework for building APIs with Python. For AI apps, it serves as the interface between your AI models and the outside world, allowing external systems to send data to your models and receive predictions or processing results back. What makes FastAPI particularly appealing is its simplicity.</p>
+<h3 id="why-fastapi-for-ai-engineering">Why FastAPI for AI Engineering?</h3>
+<ol>
+<li><strong>Performance</strong>: Built on Starlette and Pydantic, FastAPI is fast and just works.</li>
+<li><strong>Automatic Documentation</strong>: FastAPI automatically generates interactive API documentation (via Swagger UI and ReDoc) from your code and type annotations, making it easier for teams to collaborate.</li>
+<li><strong>Type Safety</strong>: Leveraging Pydantic, FastAPI provides automatic request validation and clear error messages, reducing the likelihood of runtime errors.</li>
+<li><strong>Asynchronous Support</strong>: Native support for async/await patterns allows your API to handle multiple requests efficiently while waiting for AI model responses.</li>
+</ol>
+<h2 id="learn-more">Learn More</h2>
+<p>Beyond this README, <a href="https://fastapi.tiangolo.com/tutorial/">this tutorial</a> shows you how to use FastAPI with most of its features, step by step. </p>
+<h3 id="about-uvicorn">About Uvicorn</h3>
+<p>Uvicorn is an ASGI(Asynchronous Server Gateway Interface) server that actually runs your FastAPI application. While FastAPI defines your API structure and logic, Uvicorn is the server that handles HTTP connections and serves your application. </p>
+<p>Think of FastAPI as the blueprint for your API, and Uvicorn as the engine that powers it.</p>
+<p>The command <code>uvicorn app.main:app --reload</code> means:
+- <code>app.</code>: The folder where your application resides
+- <code>main</code>: Use the file named <code>main.py</code>
+- <code>:app</code>: Look for a variable named <code>app</code> within that file
+- <code>--reload</code>: Automatically restart the server when you change your code (useful during development)</p>
+<h3 id="default-port">Default Port</h3>
+<p>By default, Uvicorn runs on port 8000. This means:
+- Your API will be accessible at <code>http://localhost:8000</code>
+- <code>localhost</code> refers to your own computer
+- <code>8000</code> is the "door" or port number through which requests can access your API</p>
+<p>You can change this with the <code>--port</code> flag if needed:
+uvicorn main:app --port 5000</p>
+<h2 id="structure">Structure</h2>
+<ul>
+<li><code>main.py</code>: Application entry point that creates the FastAPI app</li>
+<li><code>router.py</code>: Routes incoming requests to the appropriate endpoint handlers</li>
+<li><code>endpoint.py</code>: Defines data models and endpoint logic for processing events</li>
+</ul>
+<p>This modular approach keeps your code organized as your AI application grows in complexity.</p>
+<blockquote>
+<p>For comprehensive documentation, visit the <a href="https://fastapi.tiangolo.com/">FastAPI official docs</a>.</p>
+</blockquote>
+<h2 id="code-walkthrough">Code Walkthrough</h2>
+<p>Let's examine how our three files work together to create a clean API for processing AI events.</p>
+<h3 id="1-mainpy-application-entry-point">1. <code>main.py</code> - Application Entry Point</h3>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">router</span><span class="w"> </span><span class="kn">import</span> <span class="n">router</span> <span class="k">as</span> <span class="n">process_router</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
+<span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">process_router</span><span class="p">)</span>
+</code></pre></div>
+
+<p>This file:</p>
+<ul>
+<li>Creates the main FastAPI application instance</li>
+<li>Imports and includes our router</li>
+<li>Serves as the entry point for Uvicorn to run our application</li>
+</ul>
+<h3 id="2-routerpy-request-routing">2. <code>router.py</code> - Request Routing</h3>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIRouter</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">endpoint</span>
+
+<span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">()</span>
+<span class="n">router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">endpoint</span><span class="o">.</span><span class="n">router</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;/events&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;events&quot;</span><span class="p">])</span>
+</code></pre></div>
+
+<p>This file:</p>
+<ul>
+<li>Creates a main router</li>
+<li>Imports our endpoint module with its router</li>
+<li>Adds the endpoint router with the prefix <code>/events</code></li>
+<li>Uses tags for documentation organization</li>
+<li>Routes all requests that start with <code>/events</code> to our endpoint</li>
+</ul>
+<h3 id="3-endpointpy-core-logic">3. <code>endpoint.py</code> - Core Logic</h3>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">http</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPStatus</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIRouter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">starlette.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">Response</span>
+
+<span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">()</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">EventSchema</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Event Schema&quot;&quot;&quot;</span>
+
+    <span class="n">event_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">event_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">event_data</span><span class="p">:</span> <span class="nb">dict</span>
+
+
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">handle_event</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">EventSchema</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c1"># Return acceptance response</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+        <span class="n">content</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Data received!&quot;</span><span class="p">}),</span>
+        <span class="n">status_code</span><span class="o">=</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">ACCEPTED</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div>
+
+<p>This file:</p>
+<ul>
+<li>Defines a Pydantic model <code>EventSchema</code> that validates incoming data</li>
+<li>Creates an endpoint router</li>
+<li>Defines a POST handler at <code>/</code> (which becomes <code>/events/</code> when mounted in router.py)</li>
+<li>Accepts and validates incoming data against our schema</li>
+<li>Returns a JSON response with HTTP status code 202 (Accepted)</li>
+</ul>
+<h4 id="key-components">Key Components:</h4>
+<ol>
+<li><strong>Pydantic Model</strong>: <code>EventSchema</code> defines the structure of valid incoming data:</li>
+<li><code>event_id</code>: A unique identifier for the event</li>
+<li><code>event_type</code>: The category or type of event</li>
+<li>
+<p><code>event_data</code>: A dictionary containing the actual event data</p>
+</li>
+<li>
+<p><strong>Router Decorator</strong>: <code>@router.post("/")</code> creates a POST endpoint at the base path</p>
+</li>
+<li>
+<p><strong>Request Handler</strong>: <code>handle_event()</code> processes incoming data:</p>
+</li>
+<li>FastAPI automatically validates incoming JSON against <code>EventSchema</code></li>
+<li>Invalid data will be rejected with appropriate error messages</li>
+<li>
+<p>Valid data is passed to our function where we can process it</p>
+</li>
+<li>
+<p><strong>Response</strong>: Returns a simple JSON confirmation with status code 202 (Accepted)</p>
+</li>
+</ol>
+	</article>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/highlight/highlight.pack.js"></script>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.js"></script>
+    <script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/contrib/auto-render.min.js"></script>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/smartquotes/smartquotes.min.js"></script>
+    <script src="https://byui-cse.github.io/cse455-course/shared/lib/copy/copy.js"></script>
+    <script>
+
+        /* Startup scripts for katex rendering */
+    	renderMathInElement(document.body,
+		{
+			delimiters: [
+				{left: "$$", right: "$$", display: true},
+				{left: "$", right: "$", display: false},
+			]
+    	});
+
+        /* Highlighting code */
+    	hljs.initHighlightingOnLoad();
+    	var elements = document.querySelectorAll('.language-text')
+		for (var i = 0; i < elements.length; i++) {
+  			elements[i].classList.add('hljs');
+		}
+
+        /* TOC support */
+        var hideContents = function(e){
+            console.log(e.target);
+            if(e.target.id === 'modal-screen' || e.target.nodeName.toLowerCase() === 'i') {
+                e.preventDefault();
+                document.querySelector('#contents-wrapper').classList.remove('active');
+                document.querySelector('#modal-screen').classList.remove('active');
+            }
+        }
+
+        var showContents = function(e){
+            e.preventDefault();
+            document.querySelector('#contents-wrapper').classList.add('active');
+            document.querySelector('#modal-screen').classList.add('active');
+        }
+
+        document.querySelector("#hide-contents").addEventListener('click', hideContents);
+        document.querySelector("#modal-screen").addEventListener('click', hideContents);
+        document.querySelector("#show-contents").addEventListener('click', showContents);
+    	
+    </script>
+</body>
+</html>

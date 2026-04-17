@@ -32,6 +32,7 @@
 <li><a href="#xgboost-to-docker">XGBoost to Docker</a><ul>
 <li><a href="#review-the-notebook">Review the Notebook</a></li>
 <li><a href="#prepare-things-for-containerization">Prepare things for containerization</a></li>
+<li><a href="#test-your-app">Test your app</a></li>
 </ul>
 </li>
 </ul>
@@ -45,7 +46,7 @@
         <div id="titles">
             <h1>CSE 455 - Developing AI Systems</h1>
             <h2>XGBoost to Docker</h2>
-            <nav><a href="https://byui-cse.github.io/cse455-course"><i class="fas fa-home"></i></a><a href="https://byui-cse.github.io/cse455-course/module-01/">Module 1</a><a href="https://byui-cse.github.io/cse455-course/module-02/">Module 2</a><a href="https://byui-cse.github.io/cse455-course/module-03/">Module 3 - 6</a></nav>
+            <nav><a href="https://byui-cse.github.io/cse455-course"><i class="fas fa-home"></i></a><a href="https://byui-cse.github.io/cse455-course/prep-module/">Prep Module</a><a href="https://byui-cse.github.io/cse455-course/module-01/">Module 1</a><a href="https://byui-cse.github.io/cse455-course/module-02/">Module 2</a><a href="https://byui-cse.github.io/cse455-course/module-03/">Module 3 - 6</a></nav>
         </div>
         <a href="#" id="show-contents" title="Show Table of Contents"><i class="far fa-list-alt"></i></a>
     </header>
@@ -76,56 +77,96 @@
 <div class="codehilite"><pre><span></span><code><span class="n">FROM</span><span class="w"> </span><span class="n">python</span><span class="p">:</span><span class="mf">3.11</span><span class="o">-</span><span class="n">slim</span>
 <span class="n">WORKDIR</span><span class="w"> </span><span class="o">/</span><span class="n">app</span>
 
-<span class="c1"># Install system deps for xgboost if needed (kept minimal)</span>
 <span class="n">RUN</span><span class="w"> </span><span class="n">apt</span><span class="o">-</span><span class="n">get</span><span class="w"> </span><span class="n">update</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">apt</span><span class="o">-</span><span class="n">get</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="o">-</span><span class="n">y</span><span class="w"> </span><span class="n">build</span><span class="o">-</span><span class="n">essential</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">rm</span><span class="w"> </span><span class="o">-</span><span class="n">rf</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">lists</span><span class="o">/*</span>
 
 <span class="n">COPY</span><span class="w"> </span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span><span class="w"> </span><span class="o">./</span>
 <span class="n">RUN</span><span class="w"> </span><span class="n">pip</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">cache</span><span class="o">-</span><span class="n">dir</span><span class="w"> </span><span class="o">-</span><span class="n">r</span><span class="w"> </span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
 
-<span class="c1"># Copy application files and model artifacts (ensure these exist in build context)</span>
 <span class="n">COPY</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="o">/</span><span class="n">app</span>
 
-<span class="n">EXPOSE</span><span class="w"> </span><span class="mi">5000</span>
-<span class="c1"># Use gunicorn for production; fallback to Flask dev server if not installed</span>
-<span class="n">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;gunicorn&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;-w&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;4&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;-b&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;0.0.0.0:5000&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;app.app:app&quot;</span><span class="p">]</span>
+<span class="n">EXPOSE</span><span class="w"> </span><span class="mi">8000</span>
+
+<span class="n">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;uvicorn&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;app.main:app&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--host&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;0.0.0.0&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--port&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;8000&quot;</span><span class="p">]</span>
 </code></pre></div>
 
 <p>Copy this into the <code>requirements.txt</code> file:</p>
-<div class="codehilite"><pre><span></span><code>flask
-gunicorn
+<div class="codehilite"><pre><span></span><code>fastapi
+unicorn
 pandas
 xgboost
 scikit-learn==1.5.2
 joblib
+pydantic
 </code></pre></div>
 
-<p>Next copy this into the app.py file:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">jsonify</span>
+<p>Next copy this into the main.py file:</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.router</span><span class="w"> </span><span class="kn">import</span> <span class="n">router</span> <span class="k">as</span> <span class="n">process_router</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
+<span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">process_router</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Copy this into the router.py file:</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIRouter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">endpoint</span>
+
+<span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">()</span>
+<span class="n">router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">endpoint</span><span class="o">.</span><span class="n">router</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;/mpg&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;mpg&quot;</span><span class="p">])</span>
+</code></pre></div>
+
+<p>And finally this into the endpoint.py file:</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">http</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPStatus</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIRouter</span><span class="p">,</span> <span class="n">HTTPException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">starlette.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">Response</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">joblib</span><span class="w"> </span><span class="kn">import</span> <span class="n">load</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">()</span>
 
 <span class="c1"># Load model and feature list at startup</span>
 <span class="n">CURRENT_VERSION_PATH</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;models/v1&#39;</span><span class="p">)</span>
 <span class="n">MODEL_PATH</span> <span class="o">=</span> <span class="n">CURRENT_VERSION_PATH</span> <span class="o">/</span> <span class="s1">&#39;model.joblib&#39;</span>
 <span class="n">FEATURES_PATH</span> <span class="o">=</span> <span class="n">CURRENT_VERSION_PATH</span> <span class="o">/</span> <span class="s1">&#39;feature_names.json&#39;</span>
 
-<span class="c1"># Load the model</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">MODEL_PATH</span><span class="p">)</span>
 
-<span class="c1"># Load expected features</span>
 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">FEATURES_PATH</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">expected_features</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
 
+<span class="k">class</span><span class="w"> </span><span class="nc">CarSchema</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for a single car record.&quot;&quot;&quot;</span>
+
+    <span class="n">cylinders</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Number of cylinders&quot;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">displacement</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Engine displacement&quot;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="mf">307.0</span><span class="p">)</span>
+    <span class="n">acceleration</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Time to accelerate (seconds)&quot;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="mf">12.0</span><span class="p">)</span>
+    <span class="n">weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Vehicle weight (lbs)&quot;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="mf">3504.0</span><span class="p">)</span>
+    <span class="n">horsepower</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Engine horsepower&quot;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="mf">130.0</span><span class="p">)</span>
+    <span class="n">year</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Model year&quot;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="mi">75</span><span class="p">)</span>
+    <span class="n">origin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Origin (1=USA, 2=Europe, 3=Japan)&quot;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Car name&quot;</span><span class="p">,</span> <span class="n">example</span><span class="o">=</span><span class="s2">&quot;chevy ltd&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PredictionInput</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">CarSchema</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">CarSchema</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;A single car record or a list of car records&quot;</span>
+    <span class="p">)</span>
+
+
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">preprocess_for_prod_from_json</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="n">records</span> <span class="o">=</span> <span class="p">[</span><span class="n">payload</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">records</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">exclude_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">records</span> <span class="o">=</span> <span class="n">payload</span>    
+        <span class="n">records</span> <span class="o">=</span> <span class="p">[</span><span class="n">payload</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">exclude_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)]</span>
+
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
 
     <span class="c1"># --- Numeric preprocessing ---</span>
@@ -135,6 +176,7 @@ joblib
     <span class="c1"># --- Categorical preprocessing ---</span>
     <span class="k">if</span> <span class="s1">&#39;origin&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
         <span class="n">df</span><span class="p">[</span><span class="s1">&#39;origin&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;origin&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">({</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;USA&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;Europe&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;Japan&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="s1">&#39;name&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
         <span class="n">df</span><span class="p">[</span><span class="s1">&#39;maker&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
@@ -144,41 +186,47 @@ joblib
     <span class="n">origin_dummies</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;origin&#39;</span><span class="p">],</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">prefix_sep</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;origin&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
     <span class="n">maker_dummies</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;maker&#39;</span><span class="p">]])</span> <span class="k">if</span> <span class="s1">&#39;maker&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 
-    <span class="c1"># --- Combine numeric + dummies ---</span>
+    <span class="c1"># --- Combine ---</span>
     <span class="n">numeric_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;cylinders&#39;</span><span class="p">,</span><span class="s1">&#39;displacement&#39;</span><span class="p">,</span><span class="s1">&#39;acceleration&#39;</span><span class="p">,</span><span class="s1">&#39;weight&#39;</span><span class="p">,</span><span class="s1">&#39;horsepower&#39;</span><span class="p">,</span><span class="s1">&#39;year&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
     <span class="n">Xcand</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">[</span><span class="n">numeric_cols</span><span class="p">],</span> <span class="n">origin_dummies</span><span class="p">,</span> <span class="n">maker_dummies</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-
-    <span class="c1"># Add missing columns</span>
+    <span class="c1"># Align columns</span>
     <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">expected_features</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Xcand</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="n">Xcand</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="c1"># Keep only expected columns in order</span>
+
     <span class="n">Xcand</span> <span class="o">=</span> <span class="n">Xcand</span><span class="p">[</span><span class="n">expected_features</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">Xcand</span>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/predict&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">():</span>
-    <span class="n">payload</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get_json</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">payload</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;Invalid or missing JSON payload&#39;</span><span class="p">}),</span> <span class="mi">400</span>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/predict&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="n">input_data</span><span class="p">:</span> <span class="n">PredictionInput</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">Xp</span> <span class="o">=</span> <span class="n">preprocess_for_prod_from_json</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="n">Xp</span> <span class="o">=</span> <span class="n">preprocess_for_prod_from_json</span><span class="p">(</span><span class="n">input_data</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
         <span class="n">preds</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xp</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s1">&#39;predictions&#39;</span><span class="p">:</span> <span class="n">preds</span><span class="o">.</span><span class="n">tolist</span><span class="p">()})</span>
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+            <span class="n">content</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">&quot;predictions&quot;</span><span class="p">:</span> <span class="n">preds</span><span class="o">.</span><span class="n">tolist</span><span class="p">()}),</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span><span class="p">,</span>
+            <span class="n">media_type</span><span class="o">=</span><span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}),</span> <span class="mi">500</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/health&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">health</span><span class="p">():</span>
-    <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;ok&#39;</span><span class="p">})</span>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/health&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">health</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+        <span class="n">content</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">}),</span>
+        <span class="n">status_code</span><span class="o">=</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span><span class="p">,</span>
+        <span class="n">media_type</span><span class="o">=</span><span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div>
 
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+<h3 id="test-your-app">Test your app</h3>
+<p>You can test your app with this code:</p>
+<div class="codehilite"><pre><span></span><code>cd deploy
+uvicorn app.main:app --port 8000
 </code></pre></div>
 
 <p>Run this command to build the container. Make sure you are in the folder with the Dockerfile </p>
@@ -187,16 +235,23 @@ joblib
 <p>If you get an error, you may have forgotten to start Docker!</p>
 <p>Make sure you have Docker Desktop running.</p>
 </div>
-<div class="codehilite"><pre><span></span><code>docker build -t xgb-flask .
+<div class="codehilite"><pre><span></span><code>docker build -t xgb-fastapi .
 </code></pre></div>
 
 <p>Then let's run it locally</p>
-<div class="codehilite"><pre><span></span><code>docker run --rm -p 5000:5000 xgb-flask 
+<div class="codehilite"><pre><span></span><code>docker run --rm -p 8000:8000 xgb-fastapi 
 </code></pre></div>
 
-<p>You can test your code from <code>git bash</code> or the <code>terminal</code></p>
-<div class="codehilite"><pre><span></span><code>curl -X POST http://localhost:5000/predict -H &quot;Content-Type: application/json&quot; -d &#39;{&quot;cylinders&quot;:8,&quot;displacement&quot;:307,&quot;acceleration&quot;:12,&quot;weight&quot;:3504,&quot;horsepower&quot;:130,&quot;year&quot;:75,&quot;origin&quot;:5,&quot;name&quot;:&quot;chevy ltd&quot;}&#39;
-</code></pre></div>
+<p>You can test your container by going to this address and clicking on mpg/health and "Try it out" -&gt; Execute.</p>
+<p><a href="http://localhost:8000/docs">http://localhost:8000/docs</a></p>
+<div class="admonition note">
+<p class="admonition-title">docs</p>
+<p>FastApi automatically creates swagger docs for your endpoint.</p>
+</div>
+<p>Your endpoints should be </p>
+<p><a href="http://localhost:8000/mpg/health">http://localhost:8000/mpg/health</a></p>
+<p>and</p>
+<p><a href="http://localhost:8000/mpg/predict">http://localhost:8000/mpg/predict</a></p>
 	</article>
 	<script src="https://byui-cse.github.io/cse455-course/shared/lib/highlight/highlight.pack.js"></script>
 	<script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.js"></script>

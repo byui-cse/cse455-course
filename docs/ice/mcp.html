@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Course Index</title>
+	<title>MCP Example</title>
     <style>
         @font-face {
             font-family: 'icomoon';
@@ -29,8 +29,11 @@
         <div id="contents-wrapper">
             <div class="toc">
 <ul>
-<li><a href="#cse-455-course-index">CSE 455 - Course Index</a></li>
-<li><a href="#module-links">Module Links</a></li>
+<li><a href="#model-context-protocol">Model Context Protocol</a></li>
+<li><a href="#mcp-architecture">MCP Architecture</a><ul>
+<li><a href="#transport-mechanisms-deep-dive">Transport Mechanisms Deep Dive</a></li>
+</ul>
+</li>
 </ul>
 </div>
 
@@ -41,40 +44,54 @@
         <span class="icon-byui-logo"></span>
         <div id="titles">
             <h1>CSE 455 - Developing AI Systems</h1>
-            <h2>Course Index</h2>
+            <h2>MCP Example</h2>
             <nav><a href="https://byui-cse.github.io/cse455-course"><i class="fas fa-home"></i></a><a href="https://byui-cse.github.io/cse455-course/prep-module/">Prep Module</a><a href="https://byui-cse.github.io/cse455-course/module-01/">Module 1</a><a href="https://byui-cse.github.io/cse455-course/module-02/">Module 2</a><a href="https://byui-cse.github.io/cse455-course/module-03/">Module 3 - 6</a></nav>
         </div>
         <a href="#" id="show-contents" title="Show Table of Contents"><i class="far fa-list-alt"></i></a>
     </header>
 	<article>
-		<!-- ![Technology Product Development](https://byui-cse.github.io/cse455-course/shared/img/technology-product-development-hero.jpg)
-*[Photo by Dall-E-3](https://openai.com/dall-e-3)* -->
-
-<!-- ![From Idea to Product](https://byui-cse.github.io/cse455-course/shared/img/x99-hero.jpg)
-
-Let’s make something the world hasn’t seen yet. -->
-
-<h2 id="cse-455-course-index">CSE 455 - Course Index</h2>
-<p>This course prepares you to use AI in industry.</p>
-<p>Building on previous experience with machine learning modeling, you will learn to design and implement end-to-end AI systems. You will learn to deploy these systems into working environments and monitor them for iterative improvement.  </p>
-<p>This is a handy index page for the course content of CSE 455. This content is subject to change without notice and is for informational purposes only. </p>
-<p>If you're a student, the content, assignments, and deadlines you'll be responsible for are those linked to from I-Learn.</p>
+		<p>pip install -r /mcp/crash-course/requirements.txt</p>
+<p><a href="https://www.anthropic.com/news/model-context-protocol">Introducing the Model Context Protocol</a>
+<a href="https://www.youtube.com/watch?v=5xqFjh56AwM">MCP Crash Course</a></p>
+<h2 id="model-context-protocol">Model Context Protocol</h2>
+<blockquote>
+<p>Model Context Protocol (MCP), a new standard for connecting AI assistants to the systems where data lives, including content repositories, business tools, and development environments.</p>
+</blockquote>
+<p><img alt="MCP Infographic" src="https://byui-cse.github.io/cse455-course/shared/img/mcp.webp" /></p>
+<h2 id="mcp-architecture">MCP Architecture</h2>
 <ul>
-<li><a href="./course/syllabus.html">Course Syllabus</a></li>
+<li><strong>MCP Hosts</strong>: Programs like Claude Desktop, IDEs, or your python application that want to access data through MCP</li>
+<li><strong>MCP Clients</strong>: Protocol clients that maintain 1:1 connections with servers</li>
+<li><strong>MCP Servers</strong>: Lightweight programs that each expose specific capabilities through the standardized Model Context Protocol (tools, resources, prompts)</li>
+<li><strong>Local Data Sources</strong>: Your computer's files, databases, and services that MCP servers can securely access</li>
+<li><strong>Remote Services</strong>: External systems available over the internet (e.g., through APIs) that MCP servers can connect to</li>
 </ul>
-<h2 id="module-links">Module Links</h2>
-<p>For your convenience, links to each module overview is listed below, but please remember that the assignments listed in your Canvas session by your instructor are the final word on what is actually due on a given day:</p>
-<ul>
-<li><a href="./module-01/">Module 01</a></li>
-<li><a href="./module-02/">Module 02</a></li>
-<li><a href="./module-03/">Module 03</a></li>
-</ul>
-<p>Helpful modules</p>
-<ul>
-<li><a href="./ice/xg-boost-production-example.html">XGBoost to Docker</a></li>
-<li><a href="./ice/nn-production-example.html">NN to Docker</a></li>
-<li><a href="./ice/deploy-to-aws.html">Deploy to AWS</a></li>
-</ul>
+<h3 id="transport-mechanisms-deep-dive">Transport Mechanisms Deep Dive</h3>
+<p>MCP supports three main transport mechanisms:</p>
+<ol>
+<li><strong>Stdio (Standard IO)</strong>: </li>
+<li>Communication occurs over standard input/output streams</li>
+<li>Best for local integrations when the server and client are on the same machine</li>
+<li>
+<p>Simple setup with no network configuration required</p>
+</li>
+<li>
+<p><strong>SSE (Server-Sent Events)</strong>:</p>
+</li>
+<li>Uses HTTP for client-to-server communication and SSE for server-to-client</li>
+<li>Suitable for remote connections across networks</li>
+<li>
+<p>Allows for distributed architectures</p>
+</li>
+<li>
+<p><strong>Streamable HTTP</strong> <em>(Introduced March 24, 2025)</em>:</p>
+</li>
+<li>Modern HTTP-based streaming transport that supersedes SSE</li>
+<li>Uses a unified endpoint for bidirectional communication</li>
+<li><strong>Recommended for production deployments</strong> due to better performance and scalability</li>
+<li>Supports both stateful and stateless operation modes</li>
+</ol>
+<p>python server.py</p>
 	</article>
 	<script src="https://byui-cse.github.io/cse455-course/shared/lib/highlight/highlight.pack.js"></script>
 	<script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.js"></script>
