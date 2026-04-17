@@ -63,7 +63,7 @@ Copy this into the `requirements.txt` file:
 
 ```
 fastapi
-unicorn
+uvicorn
 pandas
 xgboost
 scikit-learn==1.5.2
