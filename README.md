@@ -121,6 +121,17 @@ Footnotes can be used according to the standard [footnotes extension](https://py
 ...
 ![Footnote reference](readme-img/footnote2.png)
 
+### Markdown tables
+
+Pipe-style Markdown tables are supported by the build toolchain:
+
+	| Name | Value |
+	| --- | ---: |
+	| Example | 42 |
+
+Column alignment is controlled by the separator row. The table is rendered as
+semantic HTML using `<table>`, `<thead>`, and `<tbody>` elements.
+
 ### Admonition Blocks
 
 [Admonition blocks](https://python-markdown.github.io/extensions/admonition/) allow you to specify

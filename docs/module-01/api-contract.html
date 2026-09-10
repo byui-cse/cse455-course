@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{{TITLE}}</title>
+    <style>
+        @font-face {
+            font-family: 'icomoon';
+            src: url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.eot');
+            src: url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.eot#iefix-8k8p81') format('embedded-opentype'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.ttf') format('truetype'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.woff') format('woff'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.svg#icomoon') format('svg');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/reset.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/fonts/fontawesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/highlight/styles/monokai-sublime.min.css">
+	<link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/main.css?v1.5">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">    
+    <meta charset="utf-8">
+
+</head>
+<body class="">
+     <div id="modal-screen">
+        <div id="contents-wrapper">
+            <div class="toc">
+<ul>
+<li><a href="#recommendation-api-contract">Recommendation API Contract</a><ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#base-url">Base URL</a></li>
+<li><a href="#health-check">Health Check</a><ul>
+<li><a href="#endpoint">Endpoint</a></li>
+<li><a href="#purpose">Purpose</a></li>
+<li><a href="#successful-response">Successful response</a></li>
+<li><a href="#example-request">Example request</a></li>
+<li><a href="#example-response">Example response</a></li>
+</ul>
+</li>
+<li><a href="#recommendation-endpoint">Recommendation Endpoint</a><ul>
+<li><a href="#endpoint_1">Endpoint</a></li>
+<li><a href="#required-headers">Required headers</a></li>
+<li><a href="#request-body">Request body</a></li>
+<li><a href="#request-fields">Request fields</a></li>
+<li><a href="#request-rules">Request rules</a></li>
+<li><a href="#example-request_1">Example request</a></li>
+</ul>
+</li>
+<li><a href="#successful-recommendation-response">Successful Recommendation Response</a><ul>
+<li><a href="#status">Status</a></li>
+<li><a href="#response-body">Response body</a></li>
+<li><a href="#response-fields">Response fields</a></li>
+</ul>
+</li>
+<li><a href="#error-responses">Error Responses</a><ul>
+<li><a href="#invalid-request">Invalid request</a></li>
+<li><a href="#request-timeout">Request timeout</a></li>
+<li><a href="#internal-service-error">Internal service error</a></li>
+</ul>
+</li>
+<li><a href="#required-service-behavior">Required Service Behavior</a></li>
+<li><a href="#endpoint-summary">Endpoint Summary</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+            <a href="#" id="hide-contents" title="Close Table of Contents"><i class="far fa-window-close"></i></a>
+        </div>
+    </div>
+	<header>
+        <span class="icon-byui-logo"></span>
+        <div id="titles">
+            <h1>CSE 455 - Developing AI Systems</h1>
+            <h2>{{TITLE}}</h2>
+            <nav><a href="https://byui-cse.github.io/cse455-course"><i class="fas fa-home"></i></a><a href="https://byui-cse.github.io/cse455-course/prep-module/">Prep Module</a><a href="https://byui-cse.github.io/cse455-course/module-01/">Module 1</a><a href="https://byui-cse.github.io/cse455-course/module-02/">Module 2</a><a href="https://byui-cse.github.io/cse455-course/module-03/">Module 3 - 6</a></nav>
+        </div>
+        <a href="#" id="show-contents" title="Show Table of Contents"><i class="far fa-list-alt"></i></a>
+    </header>
+	<article>
+		<h1 id="recommendation-api-contract">Recommendation API Contract</h1>
+<h2 id="overview">Overview</h2>
+<p>The Recommendation API provides product recommendations based on the contents of a customer’s shopping cart. It also provides a health-check endpoint that load balancers and monitoring systems can use to verify that the service is running.</p>
+<h2 id="base-url">Base URL</h2>
+<p>The public API is available at:</p>
+<div class="codehilite"><pre><span></span><code>http://YOURLOADBALANCERDNS:8000
+</code></pre></div>
+
+<p>The Flask application listens internally on port <code>8080</code>. The load balancer is expected to forward public port <code>8000</code> to the application.</p>
+<hr />
+<h2 id="health-check">Health Check</h2>
+<h3 id="endpoint">Endpoint</h3>
+<div class="codehilite"><pre><span></span><code><span class="err">GET /health</span>
+</code></pre></div>
+
+<h3 id="purpose">Purpose</h3>
+<p>The health-check endpoint is required. It is used to determine whether the API service is running and able to receive requests.</p>
+<h3 id="successful-response">Successful response</h3>
+<p>Status:</p>
+<div class="codehilite"><pre><span></span><code><span class="err">200 OK</span>
+</code></pre></div>
+
+<p>Body:</p>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ok&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="example-request">Example request</h3>
+<div class="codehilite"><pre><span></span><code>curl<span class="w"> </span>http://YOURLOADBALANCERDNS:8000/health
+</code></pre></div>
+
+<h3 id="example-response">Example response</h3>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ok&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The health check must not require a request body or authentication.</p>
+<hr />
+<h2 id="recommendation-endpoint">Recommendation Endpoint</h2>
+<h3 id="endpoint_1">Endpoint</h3>
+<div class="codehilite"><pre><span></span><code><span class="err">POST /recommend</span>
+</code></pre></div>
+
+<p>The complete endpoint is:</p>
+<div class="codehilite"><pre><span></span><code>http://YOURLOADBALANCERDNS:8000/recommend
+</code></pre></div>
+
+<h3 id="required-headers">Required headers</h3>
+<div class="codehilite"><pre><span></span><code><span class="err">Content-Type: application/json</span>
+</code></pre></div>
+
+<h3 id="request-body">Request body</h3>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;cart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;240&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;200&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;277&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;78&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;top_n&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="request-fields">Request fields</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cart</code></td>
+<td>array</td>
+<td style="text-align: right;">Yes</td>
+<td>Product IDs currently in the customer’s cart</td>
+</tr>
+<tr>
+<td><code>top_n</code></td>
+<td>integer</td>
+<td style="text-align: right;">No</td>
+<td>Maximum number of recommendations to return; defaults to <code>10</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="request-rules">Request rules</h3>
+<ul>
+<li><code>cart</code> must be a JSON array.</li>
+<li>Product IDs are converted to strings by the service.</li>
+<li>The cart may contain up to <code>50</code> items.</li>
+<li><code>top_n</code> must be between <code>1</code> and <code>50</code>.</li>
+<li>If <code>top_n</code> is omitted, the service uses <code>10</code>.</li>
+<li>Unknown product IDs are ignored by the recommendation models.</li>
+<li>If no known product IDs are provided, the service returns popular products.</li>
+<li>Recommendations should not include products already in the cart.</li>
+<li>Discontinued and out-of-stock products should not be recommended.</li>
+</ul>
+<h3 id="example-request_1">Example request</h3>
+<div class="codehilite"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>http://YOURLOADBALANCERDNS:8000/recommend<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{ &quot;cart&quot;: [&quot;240&quot;, &quot;200&quot;, &quot;277&quot;, &quot;78&quot;], &quot;top_n&quot;: 10 }&#39;</span>
+</code></pre></div>
+
+<hr />
+<h2 id="successful-recommendation-response">Successful Recommendation Response</h2>
+<h3 id="status">Status</h3>
+<div class="codehilite"><pre><span></span><code><span class="err">200 OK</span>
+</code></pre></div>
+
+<h3 id="response-body">Response body</h3>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;recommendations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;315&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;122&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;401&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;scores&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.94</span><span class="p">,</span><span class="w"> </span><span class="mf">0.89</span><span class="p">,</span><span class="w"> </span><span class="mf">0.81</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="response-fields">Response fields</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>recommendations</code></td>
+<td>array of strings</td>
+<td>Recommended product IDs, ordered from highest to lowest relevance</td>
+</tr>
+<tr>
+<td><code>scores</code></td>
+<td>array of numbers</td>
+<td>Score corresponding to each recommendation</td>
+</tr>
+</tbody>
+</table>
+<p>The arrays correspond by position:</p>
+<div class="codehilite"><pre><span></span><code>recommendations[0] corresponds to scores[0]
+recommendations[1] corresponds to scores[1]
+</code></pre></div>
+
+<p>The number of returned recommendations must not exceed <code>top_n</code>. The <code>recommendations</code> and <code>scores</code> arrays must have the same length.</p>
+<hr />
+<h2 id="error-responses">Error Responses</h2>
+<h3 id="invalid-request">Invalid request</h3>
+<p>Status:</p>
+<div class="codehilite"><pre><span></span><code><span class="err">400 Bad Request</span>
+</code></pre></div>
+
+<p>Example:</p>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cart must be a list&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Possible causes include:</p>
+<ul>
+<li><code>cart</code> is not an array.</li>
+<li>The cart contains more than <code>50</code> items.</li>
+<li><code>top_n</code> is less than <code>1</code>.</li>
+<li><code>top_n</code> is greater than <code>50</code>.</li>
+<li><code>top_n</code> is not a valid integer.</li>
+</ul>
+<h3 id="request-timeout">Request timeout</h3>
+<p>Status:</p>
+<div class="codehilite"><pre><span></span><code><span class="err">504 Gateway Timeout</span>
+</code></pre></div>
+
+<p>Response:</p>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;request timeout&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="internal-service-error">Internal service error</h3>
+<p>Status:</p>
+<div class="codehilite"><pre><span></span><code><span class="err">500 Internal Server Error</span>
+</code></pre></div>
+
+<p>Response:</p>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;internal error&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="required-service-behavior">Required Service Behavior</h2>
+<p>An implementation satisfies this contract if it:</p>
+<ol>
+<li>Exposes <code>GET /health</code>.</li>
+<li>Returns <code>{"status": "ok"}</code> with HTTP status <code>200</code> from <code>/health</code>.</li>
+<li>Exposes <code>POST /recommend</code>.</li>
+<li>Accepts JSON request bodies containing <code>cart</code> and optionally <code>top_n</code>.</li>
+<li>Returns recommendation IDs and scores in corresponding arrays.</li>
+<li>Returns no more than <code>top_n</code> recommendations.</li>
+<li>Enforces the maximum cart size of <code>50</code>.</li>
+<li>Enforces the <code>top_n</code> range of <code>1–50</code>.</li>
+<li>Excludes cart items, discontinued items, and out-of-stock items from recommendations.</li>
+<li>Returns an appropriate HTTP error status instead of crashing.</li>
+<li>Listens on the application’s configured port and is reachable through the load balancer.</li>
+</ol>
+<h2 id="endpoint-summary">Endpoint Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/health</code></td>
+<td>Required service health check</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/recommend</code></td>
+<td>Generate product recommendations</td>
+</tr>
+</tbody>
+</table>
+	</article>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/highlight/highlight.pack.js"></script>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.js"></script>
+    <script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/contrib/auto-render.min.js"></script>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/smartquotes/smartquotes.min.js"></script>
+    <script src="https://byui-cse.github.io/cse455-course/shared/lib/copy/copy.js"></script>
+    <script>
+
+        /* Startup scripts for katex rendering */
+    	renderMathInElement(document.body,
+		{
+			delimiters: [
+				{left: "$$", right: "$$", display: true},
+				{left: "$", right: "$", display: false},
+			]
+    	});
+
+        /* Highlighting code */
+    	hljs.initHighlightingOnLoad();
+    	var elements = document.querySelectorAll('.language-text')
+		for (var i = 0; i < elements.length; i++) {
+  			elements[i].classList.add('hljs');
+		}
+
+        /* TOC support */
+        var hideContents = function(e){
+            console.log(e.target);
+            if(e.target.id === 'modal-screen' || e.target.nodeName.toLowerCase() === 'i') {
+                e.preventDefault();
+                document.querySelector('#contents-wrapper').classList.remove('active');
+                document.querySelector('#modal-screen').classList.remove('active');
+            }
+        }
+
+        var showContents = function(e){
+            e.preventDefault();
+            document.querySelector('#contents-wrapper').classList.add('active');
+            document.querySelector('#modal-screen').classList.add('active');
+        }
+
+        document.querySelector("#hide-contents").addEventListener('click', hideContents);
+        document.querySelector("#modal-screen").addEventListener('click', hideContents);
+        document.querySelector("#show-contents").addEventListener('click', showContents);
+    	
+    </script>
+</body>
+</html>

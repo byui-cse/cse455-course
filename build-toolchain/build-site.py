@@ -6,6 +6,20 @@ import markdown
 import codecs
 # from distutils import dir_util
 from markdown.extensions.toc import TocExtension
+from markdown.extensions.tables import TableExtension
+
+# Keep the supported Markdown features in one place so they are applied to
+# every Markdown file processed by the site builder.
+MARKDOWN_EXTENSIONS = [
+	'meta',
+	'footnotes',
+	'fenced_code',
+	'codehilite',
+	'attr_list',
+	TableExtension(),
+	'admonition',
+	TocExtension(toc_depth=3),
+]
 
 # Make our config global so we don't have to pass it to every function
 config = {}
@@ -49,7 +63,7 @@ def processFiles():
 # Loads the contents of the specified file through the markdown processor, then inserts it
 # into the appropriate template
 def parse_markdown(markdown_file_path):
-	md = markdown.Markdown(extensions = ['meta', 'footnotes', 'fenced_code', 'codehilite', 'attr_list', 'tables', 'admonition', TocExtension(toc_depth=3)])
+	md = markdown.Markdown(extensions=MARKDOWN_EXTENSIONS)
 	
 	# Load the markdown and convert it ot html
 	html_content = ''

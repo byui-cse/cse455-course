@@ -612,6 +612,54 @@ article .dialogue blockquote em{
   color: var(--text-color);
 }
 
+/* Markdown table styling */
+
+article table {
+  width: 100%;
+  margin: 20px 0 30px;
+  table-layout: auto;
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--text-color);
+  text-align: left;
+  border: 1px solid var(--light-border-color);
+  background-color: var(--white-color);
+}
+
+article table thead {
+  background-color: var(--accent-color);
+  color: var(--white-color);
+}
+
+article table th,
+article table td {
+  padding: 12px 14px;
+  vertical-align: top;
+  border-right: 1px solid var(--light-border-color);
+}
+
+article table th {
+  font-weight: bold;
+}
+
+article table th:last-child,
+article table td:last-child {
+  border-right: 0;
+}
+
+article table tbody tr {
+  border-top: 1px solid var(--light-border-color);
+}
+
+article table tbody tr:nth-child(even) {
+  background-color: var(--quote-background-color);
+}
+
+article table tbody tr:hover {
+  background-color: var(--note-background-color);
+}
+
 div.phase-table + table tr:nth-child(2n) {
 	background-color:lightblue;
 }
