@@ -1,3 +1,8 @@
+---
+title: Module 01: API Contract
+body-class: index-page
+---
+
 # Recommendation API Contract
 
 ## Overview
