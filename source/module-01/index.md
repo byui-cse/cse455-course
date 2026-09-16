@@ -206,7 +206,7 @@ Models are useless unless they can be **served reliably**.
 
 ### Task
 
-Deploy your recommender as a production-style API.
+Deploy your recommender as a production-style API. It must meet the requirements of the [API Contract](api-contract.html).
 
 ---
 
