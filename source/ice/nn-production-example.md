@@ -64,10 +64,11 @@ Copy this into the `requirements.txt` file:
 ```
 fastapi
 uvicorn
-tensorflow>=2.10
 pandas
+tensorflow>=2.10
 scikit-learn==1.6.1
 joblib
+pydantic
 numpy
 ```
 
@@ -93,9 +94,12 @@ router.include_router(endpoint.router, prefix="/mpg", tags=["mpg"])
 And finally this into the `endpoint.py` file:
 ```
 import json
+import os
 from http import HTTPStatus
 from pathlib import Path
 from typing import List, Optional, Union
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 import pandas as pd
 from fastapi import APIRouter, HTTPException
@@ -104,33 +108,34 @@ from pydantic import BaseModel, Field
 from starlette.responses import Response
 from tensorflow.keras.models import load_model
 
+
 router = APIRouter()
 
-# Load model artifacts at startup
-CURRENT_VERSION_PATH = Path('models/v1')
-MODEL_PATH = CURRENT_VERSION_PATH / 'model.keras'
-FEATURES_PATH = CURRENT_VERSION_PATH / 'feature_names.json'
-SCALER_PATH = CURRENT_VERSION_PATH / 'scaler.joblib'
+# Keep the artifact layout identical to the original deployment.
+CURRENT_VERSION_PATH = Path("models/v1")
+MODEL_PATH = CURRENT_VERSION_PATH / "model.keras"
+FEATURES_PATH = CURRENT_VERSION_PATH / "feature_names.json"
+SCALER_PATH = CURRENT_VERSION_PATH / "scaler.joblib"
 
-model = load_model(MODEL_PATH)
+model = load_model(MODEL_PATH, compile=False)
 
-with open(FEATURES_PATH, 'r') as f:
-    expected_features = json.load(f)
+with FEATURES_PATH.open("r") as feature_file:
+    expected_features = json.load(feature_file)
 
 scaler = load(SCALER_PATH)
 
 
 class CarSchema(BaseModel):
-    """Schema for a single car record."""
+    """A single record from the Auto MPG data set."""
 
     cylinders: Optional[int] = Field(None, description="Number of cylinders", example=8)
     displacement: Optional[float] = Field(None, description="Engine displacement", example=307.0)
-    acceleration: Optional[float] = Field(None, description="Time to accelerate (seconds)", example=12.0)
-    weight: Optional[float] = Field(None, description="Vehicle weight (lbs)", example=3504.0)
-    horsepower: Optional[float] = Field(None, description="Engine horsepower", example=130.0)
+    acceleration: Optional[float] = Field(None, description="Acceleration time in seconds", example=12.0)
+    weight: Optional[float] = Field(None, description="Vehicle weight in pounds", example=3504.0)
+    horsepower: Optional[float] = Field(None, description="Horsepower; '?' is treated as 0", example=130.0)
     year: Optional[int] = Field(None, description="Model year", example=75)
     origin: Optional[int] = Field(None, description="Origin (1=USA, 2=Europe, 3=Japan)", example=1)
-    name: Optional[str] = Field(None, description="Car name", example="chevy ltd")
+    name: Optional[str] = Field(None, description="Vehicle name", example="chevy ltd")
 
 
 class PredictionInput(BaseModel):
@@ -139,7 +144,7 @@ class PredictionInput(BaseModel):
     )
 
 
-def preprocess_for_prod_from_json(payload):
+def preprocess_for_prod(payload: Union[CarSchema, List[CarSchema]]):
     if isinstance(payload, list):
         records = [item.model_dump(exclude_none=True) for item in payload]
     else:
@@ -147,43 +152,60 @@ def preprocess_for_prod_from_json(payload):
 
     df = pd.DataFrame(records)
 
-    if 'horsepower' in df.columns:
-        df['horsepower'] = df['horsepower'].replace('?', 0).astype(float)
+    if "horsepower" in df.columns:
+        df["horsepower"] = df["horsepower"].replace("?", 0).astype(float)
 
-    if 'origin' in df.columns:
-        df['origin'] = df['origin'].map({1: 'USA', 2: 'Europe', 3: 'Japan'}).fillna('Unknown')
+    if "origin" in df.columns:
+        df["origin"] = df["origin"].map(
+            {1: "USA", 2: "Europe", 3: "Japan"}
+        ).fillna("Unknown")
 
-    if 'name' in df.columns:
-        df['maker'] = df['name'].astype(str).str.split(' ').str[0]
+    if "name" in df.columns:
+        df["maker"] = df["name"].astype(str).str.split(" ").str[0]
     else:
-        df['maker'] = 'Unknown'
+        df["maker"] = "Unknown"
 
-    origin_dummies = pd.get_dummies(df['origin'], prefix='', prefix_sep='') if 'origin' in df.columns else pd.DataFrame(index=df.index)
-    maker_dummies = pd.get_dummies(df[['maker']]) if 'maker' in df.columns else pd.DataFrame(index=df.index)
+    origin_dummies = (
+        pd.get_dummies(df["origin"], prefix="", prefix_sep="")
+        if "origin" in df.columns
+        else pd.DataFrame(index=df.index)
+    )
+    maker_dummies = pd.get_dummies(df[["maker"]])
 
-    numeric_cols = [c for c in ['cylinders', 'displacement', 'acceleration', 'weight', 'horsepower', 'year'] if c in df.columns]
-    Xcand = pd.concat([df[numeric_cols], origin_dummies, maker_dummies], axis=1)
+    numeric_cols = [
+        column
+        for column in [
+            "cylinders",
+            "displacement",
+            "acceleration",
+            "weight",
+            "horsepower",
+            "year",
+        ]
+        if column in df.columns
+    ]
+    candidates = pd.concat([df[numeric_cols], origin_dummies, maker_dummies], axis=1)
 
-    for col in expected_features:
-        if col not in Xcand.columns:
-            Xcand[col] = 0
+    for feature in expected_features:
+        if feature not in candidates.columns:
+            candidates[feature] = 0
 
-    Xcand = Xcand[expected_features]
-    return scaler.transform(Xcand)
+    candidates = candidates[expected_features]
+    return scaler.transform(candidates)
 
 
 @router.post("/predict")
 async def predict(input_data: PredictionInput) -> Response:
     try:
-        Xp = preprocess_for_prod_from_json(input_data.data)
-        preds = model.predict(Xp).ravel().tolist()
+        features = preprocess_for_prod(input_data.data)
+        predictions = model.predict(features, verbose=0).ravel().tolist()
         return Response(
-            content=json.dumps({"predictions": preds}),
+            content=json.dumps({"predictions": predictions}),
             status_code=HTTPStatus.OK,
             media_type="application/json",
         )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as error:
+        raise HTTPException(status_code=500, detail=str(error)) from error
 
 
 @router.get("/health")
