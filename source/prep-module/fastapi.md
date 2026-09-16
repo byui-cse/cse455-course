@@ -53,6 +53,72 @@ This modular approach keeps your code organized as your AI application grows in 
 
 > For comprehensive documentation, visit the [FastAPI official docs](https://fastapi.tiangolo.com/).
 
+## Project Setup
+
+Before working through the examples, install `uv`, create a virtual environment, and install the project's dependencies.
+
+### Install `uv`
+
+`uv` is a fast Python package and environment manager. Choose the installation command for your operating system:
+
+**macOS or Linux**
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+**Windows PowerShell**
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+Restart your terminal if necessary, then verify that `uv` is installed:
+
+```bash
+uv --version
+```
+
+### Create `requirements.txt`
+
+From your project directory, create a file named `requirements.txt` and add these packages, one per line:
+
+```text
+fastapi
+uvicorn
+pydantic
+```
+
+These are the packages used by the example: FastAPI provides the web framework, Uvicorn runs the application, and Pydantic defines and validates the request data.
+
+### Create the environment and install dependencies
+
+Create a virtual environment with `uv`:
+
+```bash
+uv venv
+```
+
+Activate it before installing the requirements.
+
+**macOS or Linux**
+
+```bash
+source .venv/bin/activate
+```
+
+**Windows PowerShell**
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+Install the packages listed in `requirements.txt`:
+
+```bash
+uv pip install -r requirements.txt
+```
+
 ## Code Walkthrough
 
 Let's examine how our three files work together to create a clean API for processing AI events.
