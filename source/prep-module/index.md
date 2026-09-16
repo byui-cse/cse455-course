@@ -17,3 +17,4 @@ body-class: index-page
 
 * Read the [Docker Tutorial](https://docs.docker.com/get-started/docker-overview)
 * Complete the [XGBoost to Docker](../ice/xg-boost-production-example.html)
+* Complete the [NN to Docker](../ice/nn-production-example.html)
