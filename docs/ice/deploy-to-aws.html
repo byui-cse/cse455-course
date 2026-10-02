@@ -131,9 +131,16 @@ refresh
 <li>Click <strong>Edit inboud rules</strong></li>
 <li>Add a rule<ul>
 <li>Type: Custom TCP</li>
-<li>Port Range: 8080 or whatever your container port was </li>
+<li>Port Range: 8000 or whatever your container port was </li>
 <li>Source: Custom</li>
 <li>0.0.0.0/0</li>
+</ul>
+</li>
+<li>Add a rule<ul>
+<li>Type: Custom TCP</li>
+<li>Port Range: 80 or whatever your container port was </li>
+<li>Source: Custom</li>
+<li>0.0.0.0/0    </li>
 </ul>
 </li>
 <li>Save rules</li>

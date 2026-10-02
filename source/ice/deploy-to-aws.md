@@ -89,9 +89,14 @@ You should see 1 image with a tag of latest in the list.
 * Click **Edit inboud rules**
 * Add a rule
     * Type: Custom TCP
-    * Port Range: 8080 or whatever your container port was 
+    * Port Range: 8000 or whatever your container port was 
     * Source: Custom
     * 0.0.0.0/0
+* Add a rule
+    * Type: Custom TCP
+    * Port Range: 80 or whatever your container port was 
+    * Source: Custom
+    * 0.0.0.0/0    
 * Save rules
 
 ## Create an ECS
