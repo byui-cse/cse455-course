@@ -181,7 +181,16 @@ Object detection, data labeling, model training, real-time inference, system lat
 <hr />
 <h3 id="task_1">Task</h3>
 <ul>
-<li>Import provided video files into <a href="https://app.cvat.ai/">https://app.cvat.ai/</a></li>
+<li>
+<p>Export the images to be indexed by CVAT</p>
+<ul>
+<li>Use <a href="https://www.ffmpeg.org/">ffmpeg</a></li>
+<li>ffmpeg -i input.mp4 -vf "fps=6" img_%04d.jpg</li>
+</ul>
+</li>
+<li>
+<p>Import image files into <a href="https://app.cvat.ai/">https://app.cvat.ai/</a></p>
+</li>
 <li>Extract frames for labeling</li>
 <li>Label candies by <strong>color class</strong><ul>
 <li>Blue<ul>

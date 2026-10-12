@@ -107,7 +107,11 @@ Analyze the physical setup:
 
 ### Task
 
-* Import provided video files into [https://app.cvat.ai/](https://app.cvat.ai/)
+* Export the images to be indexed by CVAT
+	* Use [ffmpeg](https://www.ffmpeg.org/)
+	* ffmpeg -i input.mp4 -vf "fps=6" img_%04d.jpg
+
+* Import image files into [https://app.cvat.ai/](https://app.cvat.ai/)
 * Extract frames for labeling
 * Label candies by **color class**
 	* Blue
