@@ -208,6 +208,14 @@ Pick one small change and make it, then restart the client:
 
 For each change, ask the tool directly through a sample question and check the output against its source page.
 
+## What to submit
+
+1. A brief description of the change you made and the file or function you changed.
+2. The question you used to exercise it, the MCP tool name and arguments shown in the terminal, and the assistant's answer.
+3. The matching source entry or official page, with a short explanation of whether the answer is supported by that evidence. If you added a new directory entry, include its source URL.
+4. One observation about MCP tool discovery or tool choice—for example, how the client learned about a new tool, or when the model chose not to call either search tool.
+5. In your own words, what did this activity teach you about what an MCP server provides and how a client uses its tools?
+
 ## Troubleshooting and cleanup
 
 - **Connection refused:** Check `docker compose ps`, then start the container with `docker compose up -d`.

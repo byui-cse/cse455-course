@@ -46,6 +46,7 @@
 </ul>
 </li>
 <li><a href="#build-on-the-example">Build on the example</a></li>
+<li><a href="#what-to-submit">What to submit</a></li>
 <li><a href="#troubleshooting-and-cleanup">Troubleshooting and cleanup</a></li>
 <li><a href="#source-pages-used-for-the-sample-directory">Source pages used for the sample directory</a></li>
 </ul>
@@ -248,6 +249,14 @@ docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> 
 <li>Change the client prompt so the assistant asks a brief follow-up question when the student's need is too vague to search well.</li>
 </ul>
 <p>For each change, ask the tool directly through a sample question and check the output against its source page.</p>
+<h2 id="what-to-submit">What to submit</h2>
+<ol>
+<li>A brief description of the change you made and the file or function you changed.</li>
+<li>The question you used to exercise it, the MCP tool name and arguments shown in the terminal, and the assistant's answer.</li>
+<li>The matching source entry or official page, with a short explanation of whether the answer is supported by that evidence. If you added a new directory entry, include its source URL.</li>
+<li>One observation about MCP tool discovery or tool choice—for example, how the client learned about a new tool, or when the model chose not to call either search tool.</li>
+<li>In your own words, what did this activity teach you about what an MCP server provides and how a client uses its tools?</li>
+</ol>
 <h2 id="troubleshooting-and-cleanup">Troubleshooting and cleanup</h2>
 <ul>
 <li><strong>Connection refused:</strong> Check <code>docker compose ps</code>, then start the container with <code>docker compose up -d</code>.</li>
