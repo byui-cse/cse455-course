@@ -59,7 +59,7 @@ The MCP server and client use **stdio**: the client starts the server as a child
 
 !!! note "Another transport option"
 
-    MCP also supports [Streamable HTTP](https://modelcontextprotocol.io/specification/2025-03-26/basic/transports), introduced in the March 2025 protocol revision. It uses an HTTP endpoint for client-server communication and can run statefully or statelessly. It supersedes the older HTTP+SSE transport and is the recommended choice for remote deployments. Stdio remains a good fit for local integrations like this lab, where the client launches the server.
+    MCP also supports [Streamable HTTP](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/index), introduced in the March 2025 protocol revision. It uses an HTTP endpoint for client-server communication and can run statefully or statelessly. It supersedes the older HTTP+SSE transport and is the recommended choice for remote deployments. Stdio remains a good fit for local integrations like this lab, where the client launches the server.
 
 ## Files
 
@@ -81,7 +81,7 @@ Install Python 3.11 or newer and Docker Desktop (Windows or macOS) or Docker Eng
 
 Open a terminal in `mcp-campus-resources`.
 
-Both this lab and the Contextual Retrieval lab now use the Docker image `ollama/ollama:0.12.11` and the volume `cse455-ollama-models`. Models downloaded in either lab are available to the other, and `ollama pull` skips models already present. The labs use different language models, so each model still needs to be downloaded once. If this is your first setup, continue below. If you already installed an earlier version and want to reuse its downloaded models, copy its old volume into the shared volume **before** starting the updated Compose setup or running `ollama pull`. First list existing volumes with `docker volume ls`, then run the command matching the old volume you want to keep:
+Both this lab and the Contextual Retrieval lab use the Docker image `ollama/ollama:0.12.11`, the volume `cse455-ollama-models`, and the language model `qwen3:1.7b`. Models downloaded in either lab are available to the other, and `ollama pull` skips models already present. The RAG lab also downloads `all-minilm:22m` for embeddings. If this is your first setup, continue below. If you already installed an earlier version and want to reuse its downloaded models, copy its old volume into the shared volume **before** starting the updated Compose setup or running `ollama pull`. First list existing volumes with `docker volume ls`, then run the command matching the old volume you want to keep:
 
 ```bash
 docker run --rm -v mcp-campus-resources_ollama_models:/source:ro -v cse455-ollama-models:/destination alpine:3.21 sh -c "cp -a /source/. /destination/"
