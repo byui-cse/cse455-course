@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Mini Lesson: Retrieval-Augmented Generation</title>
+    <style>
+        @font-face {
+            font-family: 'icomoon';
+            src: url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.eot');
+            src: url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.eot#iefix-8k8p81') format('embedded-opentype'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.ttf') format('truetype'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.woff') format('woff'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.svg#icomoon') format('svg');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/reset.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/fonts/fontawesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/highlight/styles/monokai-sublime.min.css">
+	<link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/main.css?v1.5">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">    
+    <meta charset="utf-8">
+
+</head>
+<body class="index-page">
+     <div id="modal-screen">
+        <div id="contents-wrapper">
+            <div class="toc">
+<ul>
+<li><a href="#contextual-retrieval-solution-walkthrough">Contextual Retrieval: Solution Walkthrough</a><ul>
+<li><a href="#learning-objectives">Learning objectives</a></li>
+<li><a href="#1-set-up-the-local-environment">1. Set up the local environment</a><ul>
+<li><a href="#optional-nvidia-gpu">Optional: NVIDIA GPU</a></li>
+</ul>
+</li>
+<li><a href="#2-explore-and-split-the-documents">2. Explore and split the documents</a></li>
+<li><a href="#3-generate-context-and-store-embeddings">3. Generate context and store embeddings</a></li>
+<li><a href="#4-compare-semantic-and-contextual-embeddings">4. Compare semantic and contextual embeddings</a></li>
+<li><a href="#5-compare-bm25-and-contextual-bm25">5. Compare BM25 and contextual BM25</a></li>
+<li><a href="#6-combine-rankings-with-reciprocal-rank-fusion">6. Combine rankings with reciprocal rank fusion</a></li>
+<li><a href="#7-rerank-candidates-and-generate-an-answer">7. Rerank candidates and generate an answer</a></li>
+<li><a href="#8-evaluate-the-retrieval-methods">8. Evaluate the retrieval methods</a></li>
+<li><a href="#what-to-submit">What to submit</a></li>
+<li><a href="#troubleshooting-and-cleanup">Troubleshooting and cleanup</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+            <a href="#" id="hide-contents" title="Close Table of Contents"><i class="far fa-window-close"></i></a>
+        </div>
+    </div>
+	<header>
+        <span class="icon-byui-logo"></span>
+        <div id="titles">
+            <h1>CSE 455 - Developing AI Systems</h1>
+            <h2>Mini Lesson: Retrieval-Augmented Generation</h2>
+            <nav><a href="https://byui-cse.github.io/cse455-course"><i class="fas fa-home"></i></a><a href="https://byui-cse.github.io/cse455-course/prep-module/">Prep Module</a><a href="https://byui-cse.github.io/cse455-course/module-01/">Module 1</a><a href="https://byui-cse.github.io/cse455-course/module-02/">Module 2</a><a href="https://byui-cse.github.io/cse455-course/module-03/">Module 3 - 6</a><a href="https://byui-cse.github.io/cse455-course/mini-lessons/">Mini Lessons</a></nav>
+        </div>
+        <a href="#" id="show-contents" title="Show Table of Contents"><i class="far fa-list-alt"></i></a>
+    </header>
+	<article>
+		<h1 id="contextual-retrieval-solution-walkthrough">Contextual Retrieval: Solution Walkthrough</h1>
+<p>In this walkthrough you will run and examine a completed local RAG pipeline inspired by Anthropic's <a href="https://www.anthropic.com/research/contextual-retrieval">Introducing Contextual Retrieval</a>. You will split a small document collection, store two sets of embeddings in PostgreSQL, compare semantic and keyword search, add context, combine rankings, rerank results, and generate an answer from retrieved evidence.</p>
+<p>You do not need to write Python to complete the walkthrough. Each <code>lab.py</code> command selects the completed functions in <code>solution.py</code> with <code>--impl solution</code>. Read those functions and the prompts as you go, and record your observations. No API key or GPU is required; all inference and database operations run locally after the initial downloads.</p>
+<p><strong>Estimated time:</strong> 60–90 minutes plus downloads and model inference. CPU inference, particularly reranking, may take longer. The guides and equipment in this lab are fictional.</p>
+<h2 id="learning-objectives">Learning objectives</h2>
+<ul>
+<li>Explain why a chunk can lose useful context when it is separated from its source document.</li>
+<li>Compare semantic search with BM25 keyword search and combine them using reciprocal rank fusion.</li>
+<li>Explain how chunk-specific context changes both embedding and BM25 retrieval.</li>
+<li>Observe how reranking and the number of returned chunks affect retrieval and latency.</li>
+<li>Evaluate retrieval separately from answer generation and check generated text against its sources.</li>
+</ul>
+<h2 id="1-set-up-the-local-environment">1. Set up the local environment</h2>
+<p>Install Python 3.11–3.13 and Docker Desktop with Linux containers. Start Docker Desktop and wait until its engine is running. Allow several GB of disk space for images, models, and Python packages. Internet access is required for the initial downloads; subsequent inference and retrieval run locally.</p>
+<p>Extract the ZIP and open a terminal in the <code>contextual-retrieval-solution</code> folder. On systems that use <code>python3</code>, substitute it for <code>python</code> below.</p>
+<p><strong>Windows PowerShell:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="n">python</span> <span class="n">-m</span> <span class="n">venv</span> <span class="p">.</span><span class="n">venv</span>
+<span class="p">.\.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">Activate</span><span class="p">.</span><span class="n">ps1</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">-r</span> <span class="n">requirements</span><span class="p">.</span><span class="n">txt</span>
+<span class="p">.\</span><span class="n">setup</span><span class="p">.</span><span class="n">ps1</span>
+</code></pre></div>
+
+<p>If PowerShell blocks activation, use <code>.\.venv\Scripts\python.exe</code> in place of <code>python</code> and run <code>powershell -ExecutionPolicy Bypass -File .\setup.ps1</code> for setup.</p>
+<p><strong>macOS/Linux:</strong></p>
+<div class="codehilite"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+sh<span class="w"> </span>setup.sh
+</code></pre></div>
+
+<p>Setup starts PostgreSQL with pgvector and Ollama, then downloads <code>all-minilm:22m</code> for embeddings and <code>qwen2.5:0.5b</code> for context, reranking, and answers. PostgreSQL is published at <code>127.0.0.1:55432</code> and Ollama at <code>127.0.0.1:11435</code>. The Python client uses these IPv4 addresses too, avoiding possible <code>localhost</code> IPv6 delays. The database credentials <code>lab</code> / <code>lab</code> are only for this local exercise.</p>
+<p>Check that the services and models are ready:</p>
+<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>ps
+docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>list
+</code></pre></div>
+
+<h3 id="optional-nvidia-gpu">Optional: NVIDIA GPU</h3>
+<p>The default setup uses CPU. If Docker can access a supported NVIDIA GPU, run one of the commands below instead, or rerun setup with the option to recreate Ollama with GPU access. Windows requires Docker Desktop's WSL 2 backend and a compatible NVIDIA driver; Linux requires NVIDIA Container Toolkit. See the <a href="https://docs.docker.com/desktop/features/gpu/">Docker GPU prerequisites</a> and <a href="https://docs.ollama.com/docker">Ollama Docker instructions</a>. The supplied override is for NVIDIA GPUs.</p>
+<div class="codehilite"><pre><span></span><code><span class="p">.\</span><span class="n">setup</span><span class="p">.</span><span class="n">ps1</span> <span class="n">-Gpu</span>
+</code></pre></div>
+
+<p>On Linux:</p>
+<div class="codehilite"><pre><span></span><code>sh<span class="w"> </span>setup.sh<span class="w"> </span>--gpu
+</code></pre></div>
+
+<p>After loading a model, check its <code>PROCESSOR</code> column for CPU/GPU allocation:</p>
+<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>run<span class="w"> </span>qwen2.5:0.5b<span class="w"> </span><span class="s2">&quot;Say hello in one sentence.&quot;</span>
+docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>ps
+</code></pre></div>
+
+<p>The model may disappear from <code>ollama ps</code> after it is unloaded; run the first command again if the list is empty. To use the GPU override when starting containers manually, use <code>docker compose -f compose.yaml -f compose.gpu.yaml up -d --wait</code>. To switch back to CPU mode, rerun setup without the GPU option. The named volumes retain the database and models when a container is recreated.</p>
+<h2 id="2-explore-and-split-the-documents">2. Explore and split the documents</h2>
+<p><a href="../course/data/contextual-retrieval-solution.zip">Download contextual-retrieval-solution.zip</a></p>
+<p>Open <code>data/field-guides.md</code>. This one file contains four fictional field guides, each beginning with a heading such as <code># aurora-v1 | Aurora Sensor, version 1 field guide</code>. Each paragraph becomes one chunk.</p>
+<p>The file is generated from the editable <code>data/documents.json</code>. To rebuild it, run the following command; it overwrites <code>data/field-guides.md</code>:</p>
+<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>build_documents.py
+</code></pre></div>
+
+<p>Now split the guides:</p>
+<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>split
+</code></pre></div>
+
+<p>For the provided data, expect 12 chunks with IDs such as <code>aurora-v1-3</code> and <code>boreal-v2-2</code>. Open <code>solution.py</code> and find <code>split_documents()</code>. It separates the document headings, splits paragraphs at blank lines, and creates an ID, title, paragraph text, and complete source document for each chunk. The complete source is used later for context generation; it is not included in the raw chunk's embedding.</p>
+<p>Compare the third paragraphs of the two Aurora guides. Both begin with “The device records one temperature sample,” but the isolated text does not identify the device version. The full document supplies that information. This is the context-loss problem: a relevant paragraph may be hard to find or interpret once separated from its heading.</p>
+<p>This lab uses a simple paragraph splitter, no overlap, and Markdown with a known structure. Real documents need choices about chunk size, overlap, tables, and headings. Docling is not required here; the <a href="https://docling-project.github.io/docling/">Docling documentation</a> shows a Docling-based approach.</p>
+<p><strong>Discuss:</strong> What information would be lost if the paragraph were indexed without its heading? What could go wrong if chunks were much larger or smaller?</p>
+<h2 id="3-generate-context-and-store-embeddings">3. Generate context and store embeddings</h2>
+<p>Open <code>prompts/context.txt</code> and find <code>contextualize()</code> in <code>solution.py</code>. The runner sends the <strong>whole current guide</strong> and one <strong>specific paragraph</strong> to the local language model. The model is asked to produce a short context describing where that paragraph fits. <code>lab.py</code> prepends the generated context to the original paragraph for contextual indexing.</p>
+<p>Build the index:</p>
+<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>ingest
+</code></pre></div>
+
+<p>The command prints a generated context for each of the 12 chunks. It then creates two 384-dimensional embeddings per chunk using <code>all-minilm:22m</code>: one for the original paragraph and one for <code>context + paragraph</code>. It creates the pgvector extension and <code>lab_chunks</code> table if necessary, and replaces the table contents after model processing succeeds.</p>
+<p>Inspect the stored rows:</p>
+<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>db<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>lab<span class="w"> </span>-d<span class="w"> </span>contextual_lab<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;SELECT id, context, text FROM lab_chunks ORDER BY id;&quot;</span>
+</code></pre></div>
+
+<p>Read a generated context alongside its original guide. Does it identify the right product and version? The model may omit or invent details, so context is an indexing aid rather than authoritative evidence. The table also stores the original passage, title, and both vectors. Searches use exact pgvector cosine distance; an approximate vector index is unnecessary for this tiny collection.</p>
+<p>In <code>lab.py</code>, look at <code>ingest()</code> and <code>embed()</code> to trace the model calls and SQL inserts. Anthropic's article discusses prompt caching to reduce repeated processing of the full document; this example sends the short guide on each context-generation call and does not implement caching. For a sufficiently small collection that fits in a model's context window, consider whether sending the whole collection directly might be simpler than retrieval.</p>
+<p><strong>Discuss:</strong> How does the context prompt help distinguish two otherwise similar paragraphs? Is every statement in the generated context supported by the source?</p>
+<h2 id="4-compare-semantic-and-contextual-embeddings">4. Compare semantic and contextual embeddings</h2>
+<p>Run the same question against the two vector columns:</p>
+<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;How often does Aurora Sensor version 1 sample temperature?&quot;</span><span class="w"> </span>--mode<span class="w"> </span>dense
+python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;How often does Aurora Sensor version 1 sample temperature?&quot;</span><span class="w"> </span>--mode<span class="w"> </span>context-dense
+</code></pre></div>
+
+<p><code>dense</code> embeds the question and searches the original paragraph vectors; <code>context-dense</code> searches the context-plus-paragraph vectors. Both commands display each result's ID, score, generated context, and original passage. The displayed context is stored metadata even in <code>dense</code> mode; it was not used to create that mode's raw vectors.</p>
+<p>For this question, compare the returned IDs with <code>aurora-v1-3</code>, the paragraph stating a 30-second sampling interval. Rankings and scores can vary with the generated context and local model behavior. Inspect <code>search()</code> in <code>lab.py</code> to see how it selects <code>raw_vector</code> or <code>contextual_vector</code> and sorts by cosine distance.</p>
+<p><strong>Discuss:</strong> Did adding context change the ordering? If it did not, can you find another question or a generated context that explains why?</p>
+<h2 id="5-compare-bm25-and-contextual-bm25">5. Compare BM25 and contextual BM25</h2>
+<p>Run keyword and semantic searches for an exact code:</p>
+<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;AX-14 Aurora Sensor version 2&quot;</span><span class="w"> </span>--mode<span class="w"> </span>bm25
+python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;AX-14 Aurora Sensor version 2&quot;</span><span class="w"> </span>--mode<span class="w"> </span>context-bm25
+python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;AX-14 Aurora Sensor version 2&quot;</span><span class="w"> </span>--mode<span class="w"> </span>context-dense
+</code></pre></div>
+
+<p>Read <code>tokenize()</code> and <code>bm25()</code> in <code>solution.py</code>. Tokens are case-insensitive, and identifiers such as <code>AX-14</code> remain a single token. BM25 rewards matching terms while accounting for document frequency, repeated terms, and paragraph length. In <code>context-bm25</code>, the indexed text contains the generated context as well as the paragraph; in <code>bm25</code>, it contains only the paragraph. This small BM25 index is calculated in Python from PostgreSQL rows, not by a PostgreSQL BM25 index.</p>
+<p>The relevant version 2 passage is <code>aurora-v2-2</code>; version 1 also contains <code>AX-14</code> but gives a different instruction. Check the returned paragraphs and generated contexts rather than assuming an exact code is enough to distinguish them.</p>
+<p><strong>Discuss:</strong> Why can a code help keyword search? How might semantic search find a passage when the question uses different words? What happens if generated context names the wrong version?</p>
+<h2 id="6-combine-rankings-with-reciprocal-rank-fusion">6. Combine rankings with reciprocal rank fusion</h2>
+<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;How long can Boreal Gateway version 2 buffer readings while offline?&quot;</span><span class="w"> </span>--mode<span class="w"> </span>hybrid
+python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;How long can Boreal Gateway version 2 buffer readings while offline?&quot;</span><span class="w"> </span>--mode<span class="w"> </span>context-hybrid
+</code></pre></div>
+
+<p><code>hybrid</code> combines raw dense and raw BM25 rankings. <code>context-hybrid</code> combines contextual dense and contextual BM25 rankings. <code>fuse()</code> in <code>solution.py</code> adds <code>1 / (60 + rank)</code> for each appearance of a chunk in the input rankings, with rank starting at 1. A chunk returned by both methods receives both contributions. This works with ranks without adding incompatible cosine and BM25 score scales.</p>
+<p>For this question, inspect <code>boreal-v2-3</code>, which states that readings are stored locally for 96 hours during an outage. The runner retrieves up to <code>--candidates</code> results from each initial search, deduplicates them through fusion, and keeps up to that number as candidates.</p>
+<p><strong>Discuss:</strong> Does combining rankings improve the result for this question? Why might the two retrieval methods contribute different candidates?</p>
+<h2 id="7-rerank-candidates-and-generate-an-answer">7. Rerank candidates and generate an answer</h2>
+<p>Read <code>prompts/rerank.txt</code> and <code>rerank()</code> in <code>solution.py</code>. The reranker sends each candidate, its generated context, and the question to the local language model, asking for a relevance score from 0 to 10. It sorts candidates by those scores. This is pointwise LLM reranking, a local teaching substitute for the separate reranking model used in the article.</p>
+<p>Compare the initial fused ranking and the reranked result using the same candidate and result counts:</p>
+<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;How do I resolve BG-27 on Boreal Gateway version 2?&quot;</span><span class="w"> </span>--mode<span class="w"> </span>context-hybrid<span class="w"> </span>--candidates<span class="w"> </span><span class="m">6</span><span class="w"> </span>--top-k<span class="w"> </span><span class="m">3</span>
+python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;How do I resolve BG-27 on Boreal Gateway version 2?&quot;</span><span class="w"> </span>--mode<span class="w"> </span>rerank<span class="w"> </span>--candidates<span class="w"> </span><span class="m">6</span><span class="w"> </span>--top-k<span class="w"> </span><span class="m">3</span>
+</code></pre></div>
+
+<p>Now ask for an answer using the reranked passages:</p>
+<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>answer<span class="w"> </span><span class="s2">&quot;How do I resolve BG-27 on Boreal Gateway version 2?&quot;</span><span class="w"> </span>--mode<span class="w"> </span>rerank<span class="w"> </span>--candidates<span class="w"> </span><span class="m">6</span><span class="w"> </span>--top-k<span class="w"> </span><span class="m">3</span>
+</code></pre></div>
+
+<p>Open <code>prompts/answer.txt</code> to see how the model is asked to use the evidence and cite chunk IDs. Check the cited original passage: <code>boreal-v2-2</code> says to update the radio firmware before rebooting. The small model may make mistakes, omit citations, or stop mid-answer when it reaches the output limit. Try a question the guides cannot answer and see whether the model admits insufficient evidence.</p>
+<p><strong>Discuss:</strong> Did reranking change the top results? How long did it take? A reranker can only reorder the candidates it receives; what happens if the relevant chunk never enters that set?</p>
+<h2 id="8-evaluate-the-retrieval-methods">8. Evaluate the retrieval methods</h2>
+<p>Open <code>data/evaluation.json</code>. Each entry contains a question and the ID of a labeled relevant chunk. The original dataset has eight questions; if you edit the file, the evaluation uses its current contents. Start with <code>--top-k 1</code> and six candidates so the modes are comparable:</p>
+<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>evaluate<span class="w"> </span>--mode<span class="w"> </span>dense<span class="w"> </span>--top-k<span class="w"> </span><span class="m">1</span>
+python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>evaluate<span class="w"> </span>--mode<span class="w"> </span>bm25<span class="w"> </span>--top-k<span class="w"> </span><span class="m">1</span>
+python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>evaluate<span class="w"> </span>--mode<span class="w"> </span>hybrid<span class="w"> </span>--top-k<span class="w"> </span><span class="m">1</span>
+python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>evaluate<span class="w"> </span>--mode<span class="w"> </span>context-dense<span class="w"> </span>--top-k<span class="w"> </span><span class="m">1</span>
+python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>evaluate<span class="w"> </span>--mode<span class="w"> </span>context-bm25<span class="w"> </span>--top-k<span class="w"> </span><span class="m">1</span>
+python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>evaluate<span class="w"> </span>--mode<span class="w"> </span>context-hybrid<span class="w"> </span>--top-k<span class="w"> </span><span class="m">1</span>
+python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w"> </span>solution<span class="w"> </span>evaluate<span class="w"> </span>--mode<span class="w"> </span>rerank<span class="w"> </span>--top-k<span class="w"> </span><span class="m">1</span><span class="w"> </span>--candidates<span class="w"> </span><span class="m">6</span>
+</code></pre></div>
+
+<p>The reranking evaluation may make up to six serial model calls per question and can take much longer on a CPU. Each command shows the expected and returned IDs, HIT or MISS, recall, hit rate, and evaluation time. The reported time excludes Python startup; a cold model load can make the first run slower than a warm run. For total command time in PowerShell while still displaying output, use:</p>
+<div class="codehilite"><pre><span></span><code><span class="nb">Measure-Command</span> <span class="p">{</span> <span class="n">python</span> <span class="n">lab</span><span class="p">.</span><span class="n">py</span> <span class="p">-</span><span class="n">-impl</span> <span class="n">solution</span> <span class="n">evaluate</span> <span class="p">-</span><span class="n">-mode</span> <span class="n">dense</span> <span class="p">-</span><span class="n">-top-k</span> <span class="n">1</span> <span class="p">|</span> <span class="nb">Out-Host</span> <span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Recall@K</strong> is the fraction of labeled relevant chunks returned in the top K, averaged across questions. <strong>Hit rate@K</strong> is the fraction of questions with at least one labeled relevant chunk returned. They are equal for this dataset when each question has exactly one labeled chunk. Repeat selected comparisons with <code>--top-k 3</code>, and inspect at least one HIT and one MISS.</p>
+<p>Anthropic reports relative reductions in retrieval failure of 49% for contextual embeddings plus contextual BM25 and 67% when reranking is added in its own experiments. The article used different models, data, and evaluation settings. This tiny hand-labeled set cannot reproduce or establish those results; contextualization and reranking can also make individual results worse. The evaluation measures retrieval of labeled chunks, not whether a generated answer is correct.</p>
+<h2 id="what-to-submit">What to submit</h2>
+<ol>
+<li>A table of recall@1 and approximate evaluation time for the seven modes, plus selected recall@3 results. Note whether model runs were cold or warm.</li>
+<li>One raw paragraph and its generated context, with an explanation of whether the context is supported by its source.</li>
+<li>One HIT and one MISS, including the expected and returned IDs and a possible explanation.</li>
+<li>An answer with its cited IDs, checked against the original passages.</li>
+<li>A short discussion of chunking, semantic versus keyword search, rank fusion, reranking latency, prompt caching, and the limits of this evaluation.</li>
+</ol>
+<h2 id="troubleshooting-and-cleanup">Troubleshooting and cleanup</h2>
+<ul>
+<li>For a stronger local language model, run <code>docker compose exec ollama ollama pull qwen2.5:1.5b</code>, then set <code>LAB_CHAT_MODEL</code> to <code>qwen2.5:1.5b</code> (<code>$env:LAB_CHAT_MODEL='qwen2.5:1.5b'</code> in PowerShell or <code>export LAB_CHAT_MODEL=qwen2.5:1.5b</code> in macOS/Linux). Rerun ingestion to regenerate context. Larger models need more memory and time. The embedding model is fixed at 384 dimensions; replacing it requires a compatible schema and re-ingestion.</li>
+<li>If a port is already occupied, inspect <code>docker ps</code>, then stop or reconfigure the conflicting service, or change the host port in <code>compose.yaml</code> and the matching <code>LAB_DATABASE_URL</code> or <code>LAB_OLLAMA_URL</code>. Use <code>127.0.0.1</code> for IPv4 loopback when setting those URLs.</li>
+<li>For service or model errors, check <code>docker compose ps</code>, <code>docker compose logs db</code>, and <code>docker compose logs ollama</code>; ensure Docker Desktop is running and rerun setup if models are missing.</li>
+<li>If reranking reports that the model returned no 0–10 score, retry or use the larger local model above; the tiny model does not always follow the scoring prompt.</li>
+<li>If you change the source document, context prompt, or splitting behavior, rerun ingestion. Paragraph or document ID changes may also require updating <code>data/evaluation.json</code>.</li>
+<li>Stop the lab containers with <code>docker compose down</code>. Named volumes retain the database and downloaded models. <code>docker compose down -v</code> also deletes those volumes and requires downloading the models again.</li>
+</ul>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://www.anthropic.com/research/contextual-retrieval">Anthropic: Introducing Contextual Retrieval</a></li>
+<li><a href="https://github.com/pgvector/pgvector">pgvector</a></li>
+<li><a href="https://ollama.com/library/all-minilm">Ollama all-minilm</a> and <a href="https://ollama.com/library/qwen2.5">Qwen 2.5</a></li>
+</ul>
+	</article>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/highlight/highlight.pack.js"></script>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.js"></script>
+    <script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/contrib/auto-render.min.js"></script>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/smartquotes/smartquotes.min.js"></script>
+    <script src="https://byui-cse.github.io/cse455-course/shared/lib/copy/copy.js"></script>
+    <script>
+
+        /* Startup scripts for katex rendering */
+    	renderMathInElement(document.body,
+		{
+			delimiters: [
+				{left: "$$", right: "$$", display: true},
+				{left: "$", right: "$", display: false},
+			]
+    	});
+
+        /* Highlighting code */
+    	hljs.initHighlightingOnLoad();
+    	var elements = document.querySelectorAll('.language-text')
+		for (var i = 0; i < elements.length; i++) {
+  			elements[i].classList.add('hljs');
+		}
+
+        /* TOC support */
+        var hideContents = function(e){
+            console.log(e.target);
+            if(e.target.id === 'modal-screen' || e.target.nodeName.toLowerCase() === 'i') {
+                e.preventDefault();
+                document.querySelector('#contents-wrapper').classList.remove('active');
+                document.querySelector('#modal-screen').classList.remove('active');
+            }
+        }
+
+        var showContents = function(e){
+            e.preventDefault();
+            document.querySelector('#contents-wrapper').classList.add('active');
+            document.querySelector('#modal-screen').classList.add('active');
+        }
+
+        document.querySelector("#hide-contents").addEventListener('click', hideContents);
+        document.querySelector("#modal-screen").addEventListener('click', hideContents);
+        document.querySelector("#show-contents").addEventListener('click', showContents);
+    	
+    </script>
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Mini Lesson: Model Context Protocol</title>
+    <style>
+        @font-face {
+            font-family: 'icomoon';
+            src: url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.eot');
+            src: url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.eot#iefix-8k8p81') format('embedded-opentype'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.ttf') format('truetype'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.woff') format('woff'), url('https://byui-cse.github.io/cse455-course/shared/fonts/byui/icomoon.svg#icomoon') format('svg');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/reset.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/fonts/fontawesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.css">
+    <link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/lib/highlight/styles/monokai-sublime.min.css">
+	<link rel="stylesheet" type="text/css" href="https://byui-cse.github.io/cse455-course/shared/main.css?v1.5">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">    
+    <meta charset="utf-8">
+
+</head>
+<body class="index-page">
+     <div id="modal-screen">
+        <div id="contents-wrapper">
+            <div class="toc">
+<ul>
+<li><a href="#lab-build-an-mcp-campus-resource-finder">Lab: Build an MCP Campus Resource Finder</a><ul>
+<li><a href="#goal">Goal</a></li>
+<li><a href="#what-you-will-see">What you will see</a></li>
+<li><a href="#files">Files</a></li>
+<li><a href="#set-up">Set up</a><ul>
+<li><a href="#optional-use-an-nvidia-gpu">Optional: use an NVIDIA GPU</a></li>
+</ul>
+</li>
+<li><a href="#walkthrough">Walkthrough</a><ul>
+<li><a href="#1-inspect-the-resource-data">1. Inspect the resource data</a></li>
+<li><a href="#2-read-the-mcp-server-and-tools">2. Read the MCP server and tools</a></li>
+<li><a href="#3-follow-tool-discovery-in-the-client">3. Follow tool discovery in the client</a></li>
+<li><a href="#4-follow-a-model-selected-tool-call">4. Follow a model-selected tool call</a></li>
+<li><a href="#5-trace-the-data-and-inspect-the-answer">5. Trace the data and inspect the answer</a></li>
+</ul>
+</li>
+<li><a href="#build-on-the-example">Build on the example</a></li>
+<li><a href="#troubleshooting-and-cleanup">Troubleshooting and cleanup</a></li>
+<li><a href="#source-pages-used-for-the-sample-directory">Source pages used for the sample directory</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+            <a href="#" id="hide-contents" title="Close Table of Contents"><i class="far fa-window-close"></i></a>
+        </div>
+    </div>
+	<header>
+        <span class="icon-byui-logo"></span>
+        <div id="titles">
+            <h1>CSE 455 - Developing AI Systems</h1>
+            <h2>Mini Lesson: Model Context Protocol</h2>
+            <nav><a href="https://byui-cse.github.io/cse455-course"><i class="fas fa-home"></i></a><a href="https://byui-cse.github.io/cse455-course/prep-module/">Prep Module</a><a href="https://byui-cse.github.io/cse455-course/module-01/">Module 1</a><a href="https://byui-cse.github.io/cse455-course/module-02/">Module 2</a><a href="https://byui-cse.github.io/cse455-course/module-03/">Module 3 - 6</a><a href="https://byui-cse.github.io/cse455-course/mini-lessons/">Mini Lessons</a></nav>
+        </div>
+        <a href="#" id="show-contents" title="Show Table of Contents"><i class="far fa-list-alt"></i></a>
+    </header>
+	<article>
+		<h1 id="lab-build-an-mcp-campus-resource-finder">Lab: Build an MCP Campus Resource Finder</h1>
+<h2 id="goal">Goal</h2>
+<p>Build a local assistant that can find BYU-Idaho student services and City of Rexburg information. You will inspect two small source-linked directories, expose two search functions as MCP tools, connect a client to the MCP server, and let a local language model choose which tool to call. The model runs in Ollama; no API key is needed.</p>
+<p>The directories are teaching snapshots compiled from official BYU-Idaho and City of Rexburg pages. Contact information, policies, eligibility, locations, and hours can change. Each entry links to its source; check the official page before relying on details.</p>
+<h2 id="what-you-will-see">What you will see</h2>
+<!-- Mermaid source retained for future editing:
+
+<div class="codehilite"><pre><span></span><code><span class="n">sequenceDiagram</span>
+<span class="w">  </span><span class="n">actor</span><span class="w"> </span><span class="n">U</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">Student</span>
+<span class="w">  </span><span class="n">participant</span><span class="w"> </span><span class="n">C</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">Python</span><span class="w"> </span><span class="n">client</span>
+<span class="w">  </span><span class="n">participant</span><span class="w"> </span><span class="n">L</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">Local</span><span class="w"> </span><span class="n">Ollama</span><span class="w"> </span><span class="n">model</span>
+<span class="w">  </span><span class="n">participant</span><span class="w"> </span><span class="n">S</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">Local</span><span class="w"> </span><span class="n">MCP</span><span class="w"> </span><span class="n">server</span>
+<span class="w">  </span><span class="n">participant</span><span class="w"> </span><span class="n">D1</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">Campus</span><span class="w"> </span><span class="n">resources</span>
+<span class="w">  </span><span class="n">participant</span><span class="w"> </span><span class="n">D2</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">Rexburg</span><span class="w"> </span><span class="n">information</span>
+<span class="w">  </span><span class="n">U</span><span class="o">-&gt;&gt;</span><span class="n">C</span><span class="p">:</span><span class="w"> </span><span class="n">Student</span><span class="w"> </span><span class="n">question</span>
+<span class="w">  </span><span class="n">C</span><span class="o">-&gt;&gt;</span><span class="n">L</span><span class="p">:</span><span class="w"> </span><span class="n">Prompt</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">two</span><span class="w"> </span><span class="k">tool</span><span class="w"> </span><span class="n">definitions</span>
+<span class="w">  </span><span class="n">L</span><span class="o">-&gt;&gt;</span><span class="n">C</span><span class="p">:</span><span class="w"> </span><span class="n">Choose</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="k">tool</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">arguments</span>
+<span class="w">  </span><span class="n">C</span><span class="o">-&gt;&gt;</span><span class="n">S</span><span class="p">:</span><span class="w"> </span><span class="n">MCP</span><span class="w"> </span><span class="k">tool</span><span class="w"> </span><span class="n">call</span><span class="w"> </span><span class="n">over</span><span class="w"> </span><span class="n">stdio</span>
+<span class="w">  </span><span class="n">alt</span><span class="w"> </span><span class="n">Campus</span><span class="w"> </span><span class="k">tool</span><span class="w"> </span><span class="n">selected</span>
+<span class="w">    </span><span class="n">S</span><span class="o">-&gt;&gt;</span><span class="n">D1</span><span class="p">:</span><span class="w"> </span><span class="n">Search</span><span class="w"> </span><span class="n">campus</span><span class="w"> </span><span class="n">resources</span>
+<span class="w">    </span><span class="n">D1</span><span class="o">-&gt;&gt;</span><span class="n">S</span><span class="p">:</span><span class="w"> </span><span class="n">Matching</span><span class="w"> </span><span class="n">entries</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="n">Rexburg</span><span class="w"> </span><span class="k">tool</span><span class="w"> </span><span class="n">selected</span>
+<span class="w">    </span><span class="n">S</span><span class="o">-&gt;&gt;</span><span class="n">D2</span><span class="p">:</span><span class="w"> </span><span class="n">Search</span><span class="w"> </span><span class="n">Rexburg</span><span class="w"> </span><span class="n">information</span>
+<span class="w">    </span><span class="n">D2</span><span class="o">-&gt;&gt;</span><span class="n">S</span><span class="p">:</span><span class="w"> </span><span class="n">Matching</span><span class="w"> </span><span class="n">entries</span>
+<span class="w">  </span><span class="n">end</span>
+<span class="w">  </span><span class="n">S</span><span class="o">-&gt;&gt;</span><span class="n">C</span><span class="p">:</span><span class="w"> </span><span class="n">Tool</span><span class="w"> </span><span class="n">result</span>
+<span class="w">  </span><span class="n">C</span><span class="o">-&gt;&gt;</span><span class="n">L</span><span class="p">:</span><span class="w"> </span><span class="n">Tool</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">conversation</span>
+<span class="w">  </span><span class="n">L</span><span class="o">-&gt;&gt;</span><span class="n">C</span><span class="p">:</span><span class="w"> </span><span class="n">Answer</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">official</span><span class="w"> </span><span class="n">link</span>
+<span class="w">  </span><span class="n">C</span><span class="o">-&gt;&gt;</span><span class="n">U</span><span class="p">:</span><span class="w"> </span><span class="n">Final</span><span class="w"> </span><span class="n">answer</span>
+</code></pre></div>
+
+
+-->
+
+<p><img alt="MCP sequence diagram" src="sequence-diagram-mcp.png" /></p>
+<p>The MCP server and client use <strong>stdio</strong>: the client starts the server as a child process and exchanges protocol messages through its input and output streams. Ollama runs in Docker and is reached through a local port. MCP standardizes how the client discovers and calls the server's tool; Ollama handles the separate decision about whether that tool is useful for a question.</p>
+<h2 id="files">Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>campus_resources.json</code></td>
+<td>Small directory of official campus services and source links</td>
+</tr>
+<tr>
+<td><code>rexburg_information.json</code></td>
+<td>Short, source-linked snapshot of City of Rexburg utilities and parking pages</td>
+</tr>
+<tr>
+<td><code>server.py</code></td>
+<td>MCP server with <code>search_campus_resources</code> and <code>search_rexburg_information</code> tools</td>
+</tr>
+<tr>
+<td><code>client.py</code></td>
+<td>MCP client, local model call, and tool-call routing loop</td>
+</tr>
+<tr>
+<td><code>compose.yaml</code></td>
+<td>Local Ollama container and persistent model volume</td>
+</tr>
+<tr>
+<td><code>compose.gpu.yaml</code></td>
+<td>Optional NVIDIA GPU access for the Ollama container</td>
+</tr>
+<tr>
+<td><code>requirements.txt</code></td>
+<td>Python dependencies</td>
+</tr>
+</tbody>
+</table>
+<h2 id="set-up">Set up</h2>
+<p>Install Python 3.11 or newer and Docker Desktop (Windows or macOS) or Docker Engine (Linux). The model download is about 2.5 GB, in addition to container and Python dependencies. Allow Docker enough memory for a 4B parameter model; CPU inference works but may be slow.</p>
+<p><a href="../course/data/mcp-campus-resources-lab.zip">Download mcp-campus-resources-lab.zip</a></p>
+<p>Open a terminal in <code>mcp-campus-resources</code>.</p>
+<p>Both this lab and <code>week-4/contextual-retrieval-local</code> now use the Docker volume <code>genai-accelerator-ollama-models</code>. Models downloaded in either lab are available to the other, and <code>ollama pull</code> skips models already present. If this is your first setup, continue below. If you already installed an earlier version and want to reuse its downloaded models, copy its old volume into the shared volume <strong>before</strong> starting the updated Compose setup or running <code>ollama pull</code>. First list existing volumes with <code>docker volume ls</code>, then run the command for each old volume you want to keep:</p>
+<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>mcp-campus-resources_ollama_models:/source:ro<span class="w"> </span>-v<span class="w"> </span>genai-accelerator-ollama-models:/destination<span class="w"> </span>alpine:3.21<span class="w"> </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;cp -a /source/. /destination/&quot;</span>
+</code></pre></div>
+
+<p>For an earlier Week 4 install, use its previous volume name instead:</p>
+<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>contextual-retrieval-local_contextual_models:/source:ro<span class="w"> </span>-v<span class="w"> </span>genai-accelerator-ollama-models:/destination<span class="w"> </span>alpine:3.21<span class="w"> </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;cp -a /source/. /destination/&quot;</span>
+</code></pre></div>
+
+<p>If you customized a Compose project name, substitute the actual old volume name shown by <code>docker volume ls</code>. Keep old volumes until you confirm the shared one works.</p>
+<p><strong>Windows PowerShell:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="n">python</span> <span class="n">-m</span> <span class="n">venv</span> <span class="p">.</span><span class="n">venv</span>
+<span class="p">.\.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">Activate</span><span class="p">.</span><span class="n">ps1</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">-r</span> <span class="n">requirements</span><span class="p">.</span><span class="n">txt</span>
+<span class="n">docker</span> <span class="n">compose</span> <span class="n">up</span> <span class="n">-d</span>
+<span class="n">docker</span> <span class="n">compose</span> <span class="n">exec</span> <span class="n">ollama</span> <span class="n">ollama</span> <span class="n">pull</span> <span class="n">qwen3</span><span class="p">:</span><span class="n">4b</span>
+</code></pre></div>
+
+<p>If PowerShell blocks environment activation, use <code>\.venv\Scripts\python.exe</code> in place of <code>python</code> in the remaining Python commands.</p>
+<p><strong>macOS/Linux:</strong></p>
+<div class="codehilite"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>pull<span class="w"> </span>qwen3:4b
+</code></pre></div>
+
+<p>The container publishes Ollama only on <code>127.0.0.1:11435</code>; the Python client uses that same address.</p>
+<p>To stop Ollama after working, run <code>docker compose down</code> from the lab folder. This stops and removes that lab's container while keeping the shared models on the machine. Start the other lab when you are ready to switch; only run one lab's Ollama container at a time because both use port <code>11435</code> and the same model store. Docker also keeps the downloaded container image cached. Avoid <code>docker compose down -v</code>: it deletes the shared model volume, so both labs will need to download their models again.</p>
+<p>Confirm that the model is available:</p>
+<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>list
+</code></pre></div>
+
+<h3 id="optional-use-an-nvidia-gpu">Optional: use an NVIDIA GPU</h3>
+<p>The default setup works on a CPU. If Docker can access a supported NVIDIA GPU, combine the base Compose file with <code>compose.gpu.yaml</code> to let Ollama use it. On Windows, Docker Desktop must use its WSL 2 backend, and the NVIDIA driver must support WSL 2 GPU access. On Linux, configure the NVIDIA Container Toolkit for Docker. See <a href="https://docs.docker.com/desktop/features/gpu/">Docker Desktop GPU prerequisites</a> and <a href="https://docs.ollama.com/docker">Ollama's Docker instructions</a>. This override requests NVIDIA GPUs; it does not configure other GPU types.</p>
+<p>After the default setup above, run:</p>
+<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>compose.yaml<span class="w"> </span>-f<span class="w"> </span>compose.gpu.yaml<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>--wait
+</code></pre></div>
+
+<p>Compose may recreate the Ollama container to apply the GPU setting. The named model volume is retained. Both CPU and GPU modes use the same local address and port. To switch back to CPU mode, run <code>docker compose up -d</code>. When starting Ollama manually after selecting GPU mode, include both files in the command each time; starting with only <code>compose.yaml</code> can recreate it without GPU access.</p>
+<p>To check whether Ollama is using the GPU, load the model and inspect its processor allocation while it is still loaded:</p>
+<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>compose.yaml<span class="w"> </span>-f<span class="w"> </span>compose.gpu.yaml<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>run<span class="w"> </span>qwen3:4b<span class="w"> </span><span class="s2">&quot;Say hello in one sentence.&quot;</span>
+docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>compose.yaml<span class="w"> </span>-f<span class="w"> </span>compose.gpu.yaml<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>ps
+</code></pre></div>
+
+<p>The <code>PROCESSOR</code> column shows the CPU/GPU allocation. An empty list means no model is loaded; run the first command again. If Compose reports that it cannot select an NVIDIA device driver, check the Docker and NVIDIA prerequisites or continue using the CPU setup.</p>
+<h2 id="walkthrough">Walkthrough</h2>
+<h3 id="1-inspect-the-resource-data">1. Inspect the resource data</h3>
+<p>Open <code>campus_resources.json</code>. Each record includes a name, category, description, searchable keywords, contact details, and an official source URL. The search tool returns these records so the model can answer from the directory instead of inventing campus details.</p>
+<p>Try tracing a few example questions to entries in the JSON:</p>
+<ul>
+<li>“Where can I get help understanding my calculus homework?”</li>
+<li>“My laptop cannot connect to campus Wi-Fi. Who can help?”</li>
+<li>“I want to change my major. Who should I talk to?”</li>
+<li>“Where can I find a transcript?”</li>
+</ul>
+<p>The directory intentionally omits a definitive schedule for services whose hours change. The assistant links to official pages for current details.</p>
+<h3 id="2-read-the-mcp-server-and-tools">2. Read the MCP server and tools</h3>
+<p>In <code>server.py</code>, <code>FastMCP</code> creates a server. The <code>@mcp.tool()</code> decorator exposes both <code>search_campus_resources</code> and <code>search_rexburg_information</code> to MCP clients. Their Python type hints become the tool input schemas, and their docstrings explain what each tool does and what its arguments mean.</p>
+<p>Each function loads its local JSON file, scores keyword overlap, and returns the best matches as JSON text. The functions are ordinary Python; MCP provides the standard way for a client to discover and call them. At the bottom, <code>mcp.run(transport="stdio")</code> starts the server using stdin and stdout.</p>
+<h3 id="3-follow-tool-discovery-in-the-client">3. Follow tool discovery in the client</h3>
+<p>In <code>client.py</code>, find <code>main()</code>:</p>
+<ol>
+<li><code>StdioServerParameters</code> tells the MCP client how to run <code>server.py</code>.</li>
+<li><code>stdio_client</code> starts that process and opens the two streams.</li>
+<li><code>ClientSession</code> initializes the MCP connection.</li>
+<li><code>session.list_tools()</code> asks the server which tools it exposes. You should see both the campus search and Rexburg search.</li>
+<li><code>tool_specs()</code> converts the MCP tool names, descriptions, and JSON input schemas into the format Ollama's chat API accepts.</li>
+</ol>
+<p>Notice that the client does not hard-code the search tool's parameter schema. It reads it from the MCP server. A different model host could use the same server and tool definition with an adapter for that host's tool format.</p>
+<h3 id="4-follow-a-model-selected-tool-call">4. Follow a model-selected tool call</h3>
+<p>Run the client:</p>
+<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>client.py
+</code></pre></div>
+
+<p>Ask one question from each group and watch which tool the model selects:</p>
+<ul>
+<li><strong>Campus:</strong> “Where can I get help understanding my calculus homework?”</li>
+<li><strong>Rexburg:</strong> “How do I get a parking permit for streets near campus?”</li>
+<li><strong>Rexburg:</strong> “How can I pay my water bill?”</li>
+</ul>
+<p>The terminal prints <code>[MCP call]</code> with the selected tool name and arguments. In <code>ask()</code>:</p>
+<ol>
+<li>The client sends the question and discovered tool definitions to Ollama with <code>tool_choice</code> left to the model.</li>
+<li>If Ollama returns a tool call, the client reads its name and arguments.</li>
+<li><code>session.call_tool(...)</code> sends that request to the MCP server. Both tools are discovered from MCP, so the client does not need separate hard-coded schemas.</li>
+<li>The client adds the tool result to the conversation and asks Ollama to produce the student-facing answer.</li>
+</ol>
+<p>Try “Tell me a joke” too. The model may answer without calling either search tool. This makes the tool-choice step visible: the model receives two available capabilities, then decides which one fits the request—or whether neither is needed.</p>
+<h3 id="5-trace-the-data-and-inspect-the-answer">5. Trace the data and inspect the answer</h3>
+<p>Ask: “I need help with stress and anxiety. What campus resource can I contact?” Check the printed MCP call, arguments, returned JSON, and final answer. Does the answer link to the Counseling Center? Did it avoid claiming a current appointment slot or unsupported eligibility?</p>
+<p>Now ask about a campus or city service missing from the directories. The selected tool should return no matches, and the assistant should say that the directory does not have a match rather than fabricate an office. The client system prompt gives a general BYU-Idaho support contact for missing campus services.</p>
+<p>The dataset contains health and counseling links for navigation. The assistant is not a medical or crisis service: the prompt directs emergencies to 911 and after-hours mental health crises to call or text 988.</p>
+<h2 id="build-on-the-example">Build on the example</h2>
+<p>The Rexburg data is a compact snapshot, not a live connection to the city website. Its two entries summarize the <a href="https://www.rexburg.org/o/cor/page/city-utilities">City Utilities &amp; Billing page</a> and the <a href="https://www.rexburg.org/o/police/page/parking">Rexburg Parking page</a>. Policies and contact information can change; check the original page before relying on details.</p>
+<p>Pick one small change and make it, then restart the client:</p>
+<ul>
+<li>Add another official BYU-Idaho resource to <code>campus_resources.json</code>, including its source URL and useful search keywords.</li>
+<li>Add another Rexburg city topic to <code>rexburg_information.json</code>, then see whether <code>search_rexburg_information</code> can find it without changes to the client.</li>
+<li>Improve ranking so an exact phrase match in a service name ranks above a broad keyword match.</li>
+<li>Add a second MCP tool, such as <code>list_resource_categories</code>, and inspect how the client discovers it without hard-coding it.</li>
+<li>Change the client prompt so the assistant asks a brief follow-up question when the student's need is too vague to search well.</li>
+</ul>
+<p>For each change, ask the tool directly through a sample question and check the output against its source page.</p>
+<h2 id="troubleshooting-and-cleanup">Troubleshooting and cleanup</h2>
+<ul>
+<li><strong>Connection refused:</strong> Check <code>docker compose ps</code>, then start the container with <code>docker compose up -d</code>.</li>
+<li><strong>Model not found:</strong> Run <code>docker compose exec ollama ollama pull qwen3:4b</code>.</li>
+<li><strong>Slow answers:</strong> The first prompt can be slower while the model loads. CPU generation can be slow; give the command time to finish.</li>
+<li><strong>Server messages corrupt the protocol:</strong> MCP stdio uses stdout for protocol messages. Keep debug <code>print()</code> calls out of <code>server.py</code>; write diagnostics to stderr instead.</li>
+<li><strong>Resource details look stale:</strong> Follow the entry's <code>source_url</code> and refresh the JSON from the official page.</li>
+</ul>
+<p>Stop the container with <code>docker compose down</code>; the model remains available to both labs. Avoid <code>docker compose down -v</code> unless you want to delete the shared Ollama models and download them again for both labs.</p>
+<h2 id="source-pages-used-for-the-sample-directory">Source pages used for the sample directory</h2>
+<ul>
+<li><a href="https://www.byui.edu/advising/">Career and Academic Advising</a></li>
+<li><a href="https://www.byui.edu/academic-success-and-tutoring/">Academic Success and Tutoring</a></li>
+<li><a href="https://td.byui.edu/TDClient/79/ITHelpCenter/KB/Article/13523/The-Walk-Up-IT-Help-Desk">Walk-Up IT Help Desk</a></li>
+<li><a href="https://www.byui.edu/financialaid/">Financial Aid</a></li>
+<li><a href="https://www.byui.edu/health-center/services">Student Health Center services</a></li>
+<li><a href="https://www.byui.edu/counseling-center/">Counseling Center</a></li>
+<li><a href="https://www.byui.edu/legal/ada">Disability Services contact information</a></li>
+<li><a href="https://library.byui.edu/">David O. McKay Library</a></li>
+<li><a href="https://www.byui.edu/student-records/">Student Records</a></li>
+<li><a href="https://www.byui.edu/mentoring/campus-resources">Campus resources directory</a></li>
+<li><a href="https://www.byui.edu/contact-us/hours">BYU-Idaho office hours</a></li>
+<li><a href="https://www.rexburg.org/o/cor/page/city-utilities">City Utilities &amp; Billing</a></li>
+<li><a href="https://www.rexburg.org/o/police/page/parking">Rexburg Parking</a></li>
+</ul>
+<p>The source pages were reviewed on <strong>November 19, 2026</strong>. This activity is a learning example, not an official BYU-Idaho or City of Rexburg directory.</p>
+	</article>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/highlight/highlight.pack.js"></script>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/katex.min.js"></script>
+    <script src="https://byui-cse.github.io/cse455-course/shared/lib/katex/contrib/auto-render.min.js"></script>
+	<script src="https://byui-cse.github.io/cse455-course/shared/lib/smartquotes/smartquotes.min.js"></script>
+    <script src="https://byui-cse.github.io/cse455-course/shared/lib/copy/copy.js"></script>
+    <script>
+
+        /* Startup scripts for katex rendering */
+    	renderMathInElement(document.body,
+		{
+			delimiters: [
+				{left: "$$", right: "$$", display: true},
+				{left: "$", right: "$", display: false},
+			]
+    	});
+
+        /* Highlighting code */
+    	hljs.initHighlightingOnLoad();
+    	var elements = document.querySelectorAll('.language-text')
+		for (var i = 0; i < elements.length; i++) {
+  			elements[i].classList.add('hljs');
+		}
+
+        /* TOC support */
+        var hideContents = function(e){
+            console.log(e.target);
+            if(e.target.id === 'modal-screen' || e.target.nodeName.toLowerCase() === 'i') {
+                e.preventDefault();
+                document.querySelector('#contents-wrapper').classList.remove('active');
+                document.querySelector('#modal-screen').classList.remove('active');
+            }
+        }
+
+        var showContents = function(e){
+            e.preventDefault();
+            document.querySelector('#contents-wrapper').classList.add('active');
+            document.querySelector('#modal-screen').classList.add('active');
+        }
+
+        document.querySelector("#hide-contents").addEventListener('click', hideContents);
+        document.querySelector("#modal-screen").addEventListener('click', hideContents);
+        document.querySelector("#show-contents").addEventListener('click', showContents);
+    	
+    </script>
+</body>
+</html>
