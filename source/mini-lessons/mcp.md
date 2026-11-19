@@ -81,25 +81,10 @@ Install Python 3.11 or newer and Docker Desktop (Windows or macOS) or Docker Eng
 
 Open a terminal in `mcp-campus-resources`.
 
-Both this lab and the Contextual Retrieval lab use the Docker image `ollama/ollama:0.12.11`, the volume `cse455-ollama-models`, and the language model `qwen3:1.7b`. Models downloaded in either lab are available to the other, and `ollama pull` skips models already present. The RAG lab also downloads `all-minilm:22m` for embeddings. If this is your first setup, continue below. If you already installed an earlier version and want to reuse its downloaded models, copy its old volume into the shared volume **before** starting the updated Compose setup or running `ollama pull`. First list existing volumes with `docker volume ls`, then run the command matching the old volume you want to keep:
+Both this lab and the Contextual Retrieval lab use the Docker image `ollama/ollama:0.12.11`, the volume `cse455-ollama-models`, and the language model `qwen3:1.7b`. Models downloaded in either lab are available to the other, and `ollama pull` skips models already present. The RAG lab also downloads `all-minilm:22m` for embeddings. Choose one setup path:
 
-```bash
-docker run --rm -v mcp-campus-resources_ollama_models:/source:ro -v cse455-ollama-models:/destination alpine:3.21 sh -c "cp -a /source/. /destination/"
-```
-
-For an earlier Week 4 install, use its previous volume name instead:
-
-```bash
-docker run --rm -v contextual-retrieval-local_contextual_models:/source:ro -v cse455-ollama-models:/destination alpine:3.21 sh -c "cp -a /source/. /destination/"
-```
-
-For an earlier install of the downloadable Contextual Retrieval solution, use:
-
-```bash
-docker run --rm -v contextual-retrieval-solution_contextual_models:/source:ro -v cse455-ollama-models:/destination alpine:3.21 sh -c "cp -a /source/. /destination/"
-```
-
-If you customized a Compose project name, substitute the actual old volume name shown by `docker volume ls`. Keep old volumes until you confirm the shared one works.
+1. **Reuse the RAG downloads (for future classes):** If you completed the updated RAG lab, its shared volume already contains `qwen3:1.7b`. Stop the RAG containers with `docker compose down` from the RAG folder, then follow the setup commands below. The `ollama pull` command will find the existing model and skip downloading it.
+2. **New install (use this for the current class):** If your earlier lab setup did not use the shared volume, continue with the setup commands below. They create `cse455-ollama-models` and download `qwen3:1.7b` into it.
 
 **Windows PowerShell:**
 

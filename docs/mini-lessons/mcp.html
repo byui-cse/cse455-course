@@ -163,19 +163,11 @@
 <p>Install Python 3.11 or newer and Docker Desktop (Windows or macOS) or Docker Engine (Linux). The Qwen3 1.7B model download is about 1.4 GB, in addition to container and Python dependencies. CPU inference works but may be slow.</p>
 <p><a href="../course/data/mcp-campus-resources-lab.zip">Download mcp-campus-resources-lab.zip</a></p>
 <p>Open a terminal in <code>mcp-campus-resources</code>.</p>
-<p>Both this lab and the Contextual Retrieval lab use the Docker image <code>ollama/ollama:0.12.11</code>, the volume <code>cse455-ollama-models</code>, and the language model <code>qwen3:1.7b</code>. Models downloaded in either lab are available to the other, and <code>ollama pull</code> skips models already present. The RAG lab also downloads <code>all-minilm:22m</code> for embeddings. If this is your first setup, continue below. If you already installed an earlier version and want to reuse its downloaded models, copy its old volume into the shared volume <strong>before</strong> starting the updated Compose setup or running <code>ollama pull</code>. First list existing volumes with <code>docker volume ls</code>, then run the command matching the old volume you want to keep:</p>
-<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>mcp-campus-resources_ollama_models:/source:ro<span class="w"> </span>-v<span class="w"> </span>cse455-ollama-models:/destination<span class="w"> </span>alpine:3.21<span class="w"> </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;cp -a /source/. /destination/&quot;</span>
-</code></pre></div>
-
-<p>For an earlier Week 4 install, use its previous volume name instead:</p>
-<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>contextual-retrieval-local_contextual_models:/source:ro<span class="w"> </span>-v<span class="w"> </span>cse455-ollama-models:/destination<span class="w"> </span>alpine:3.21<span class="w"> </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;cp -a /source/. /destination/&quot;</span>
-</code></pre></div>
-
-<p>For an earlier install of the downloadable Contextual Retrieval solution, use:</p>
-<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>contextual-retrieval-solution_contextual_models:/source:ro<span class="w"> </span>-v<span class="w"> </span>cse455-ollama-models:/destination<span class="w"> </span>alpine:3.21<span class="w"> </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;cp -a /source/. /destination/&quot;</span>
-</code></pre></div>
-
-<p>If you customized a Compose project name, substitute the actual old volume name shown by <code>docker volume ls</code>. Keep old volumes until you confirm the shared one works.</p>
+<p>Both this lab and the Contextual Retrieval lab use the Docker image <code>ollama/ollama:0.12.11</code>, the volume <code>cse455-ollama-models</code>, and the language model <code>qwen3:1.7b</code>. Models downloaded in either lab are available to the other, and <code>ollama pull</code> skips models already present. The RAG lab also downloads <code>all-minilm:22m</code> for embeddings. Choose one setup path:</p>
+<ol>
+<li><strong>Reuse the RAG downloads (for future classes):</strong> If you completed the updated RAG lab, its shared volume already contains <code>qwen3:1.7b</code>. Stop the RAG containers with <code>docker compose down</code> from the RAG folder, then follow the setup commands below. The <code>ollama pull</code> command will find the existing model and skip downloading it.</li>
+<li><strong>New install (use this for the current class):</strong> If your earlier lab setup did not use the shared volume, continue with the setup commands below. They create <code>cse455-ollama-models</code> and download <code>qwen3:1.7b</code> into it.</li>
+</ol>
 <p><strong>Windows PowerShell:</strong></p>
 <div class="codehilite"><pre><span></span><code><span class="n">python</span> <span class="n">-m</span> <span class="n">venv</span> <span class="p">.</span><span class="n">venv</span>
 <span class="p">.\.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">Activate</span><span class="p">.</span><span class="n">ps1</span>
