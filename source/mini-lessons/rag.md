@@ -21,7 +21,7 @@ You do not need to write Python to complete the walkthrough. Each `lab.py` comma
 
 ## 1. Set up the local environment
 
-Install Python 3.11–3.13 and Docker Desktop with Linux containers. Start Docker Desktop and wait until its engine is running. Allow several GB of disk space for images, models, and Python packages. Internet access is required for the initial downloads; subsequent inference and retrieval run locally.
+Install Python 3.11–3.13 and Docker Desktop with Linux containers. Start Docker Desktop and wait until its engine is running. Allow several GB of disk space for images, models, and Python packages. Internet access is required for the initial downloads; subsequent inference and retrieval run locally. This lab and the MCP Campus Resource Finder share the Docker image `ollama/ollama:0.12.11` and the Docker volume `cse455-ollama-models`. Each lab pulls its own models into that shared volume; each model is downloaded only once and remains available when you switch labs.
 
 [Download contextual-retrieval-solution.zip](../course/data/contextual-retrieval-solution.zip)
 
@@ -47,7 +47,7 @@ python -m pip install -r requirements.txt
 sh setup.sh
 ```
 
-Setup starts PostgreSQL with pgvector and Ollama, then downloads `all-minilm:22m` for embeddings and `qwen2.5:0.5b` for context, reranking, and answers. PostgreSQL is published at `127.0.0.1:55432` and Ollama at `127.0.0.1:11435`. The Python client uses these IPv4 addresses too, avoiding possible `localhost` IPv6 delays. The database credentials `lab` / `lab` are only for this local exercise.
+Setup starts PostgreSQL with pgvector and Ollama, then downloads `all-minilm:22m` for embeddings and `qwen3:1.7b` for context, reranking, and answers. The MCP lab uses the same Ollama image, shared model volume, and Qwen3 model, so that model is downloaded only once across the two labs. PostgreSQL is published at `127.0.0.1:55432` and Ollama at `127.0.0.1:11435`. The Python client uses these IPv4 addresses too, avoiding possible `localhost` IPv6 delays. The database credentials `lab` / `lab` are only for this local exercise.
 
 Check that the services and models are ready:
 
@@ -73,7 +73,7 @@ sh setup.sh --gpu
 After loading a model, check its `PROCESSOR` column for CPU/GPU allocation:
 
 ```bash
-docker compose exec ollama ollama run qwen2.5:0.5b "Say hello in one sentence."
+docker compose exec ollama ollama run qwen3:1.7b "Say hello in one sentence."
 docker compose exec ollama ollama ps
 ```
 
@@ -227,15 +227,15 @@ Anthropic reports relative reductions in retrieval failure of 49% for contextual
 
 ## Troubleshooting and cleanup
 
-- For a stronger local language model, run `docker compose exec ollama ollama pull qwen2.5:1.5b`, then set `LAB_CHAT_MODEL` to `qwen2.5:1.5b` (`$env:LAB_CHAT_MODEL='qwen2.5:1.5b'` in PowerShell or `export LAB_CHAT_MODEL=qwen2.5:1.5b` in macOS/Linux). Rerun ingestion to regenerate context. Larger models need more memory and time. The embedding model is fixed at 384 dimensions; replacing it requires a compatible schema and re-ingestion.
+- For a stronger local language model, run `docker compose exec ollama ollama pull qwen3:4b`, then set `LAB_CHAT_MODEL` to `qwen3:4b` (`$env:LAB_CHAT_MODEL='qwen3:4b'` in PowerShell or `export LAB_CHAT_MODEL=qwen3:4b` in macOS/Linux). Rerun ingestion to regenerate context. The 4B model needs more memory and time. The embedding model is fixed at 384 dimensions; replacing it requires a compatible schema and re-ingestion.
 - If a port is already occupied, inspect `docker ps`, then stop or reconfigure the conflicting service, or change the host port in `compose.yaml` and the matching `LAB_DATABASE_URL` or `LAB_OLLAMA_URL`. Use `127.0.0.1` for IPv4 loopback when setting those URLs.
 - For service or model errors, check `docker compose ps`, `docker compose logs db`, and `docker compose logs ollama`; ensure Docker Desktop is running and rerun setup if models are missing.
 - If reranking reports that the model returned no 0–10 score, retry or use the larger local model above; the tiny model does not always follow the scoring prompt.
 - If you change the source document, context prompt, or splitting behavior, rerun ingestion. Paragraph or document ID changes may also require updating `data/evaluation.json`.
-- Stop the lab containers with `docker compose down`. Named volumes retain the database and downloaded models. `docker compose down -v` also deletes those volumes and requires downloading the models again.
+- Stop the lab containers with `docker compose down`. This lab's database volume and the shared Ollama model volume are retained. `docker compose down -v` also deletes those volumes, including models used by both labs, so they must be downloaded again.
 
 ## References
 
 - [Anthropic: Introducing Contextual Retrieval](https://www.anthropic.com/research/contextual-retrieval)
 - [pgvector](https://github.com/pgvector/pgvector)
-- [Ollama all-minilm](https://ollama.com/library/all-minilm) and [Qwen 2.5](https://ollama.com/library/qwen2.5)
+- [Ollama all-minilm](https://ollama.com/library/all-minilm) and [Qwen3](https://ollama.com/library/qwen3)

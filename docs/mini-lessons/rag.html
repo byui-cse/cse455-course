@@ -76,7 +76,7 @@
 <li>Evaluate retrieval separately from answer generation and check generated text against its sources.</li>
 </ul>
 <h2 id="1-set-up-the-local-environment">1. Set up the local environment</h2>
-<p>Install Python 3.11–3.13 and Docker Desktop with Linux containers. Start Docker Desktop and wait until its engine is running. Allow several GB of disk space for images, models, and Python packages. Internet access is required for the initial downloads; subsequent inference and retrieval run locally.</p>
+<p>Install Python 3.11–3.13 and Docker Desktop with Linux containers. Start Docker Desktop and wait until its engine is running. Allow several GB of disk space for images, models, and Python packages. Internet access is required for the initial downloads; subsequent inference and retrieval run locally. This lab and the MCP Campus Resource Finder share the Docker image <code>ollama/ollama:0.12.11</code> and the Docker volume <code>cse455-ollama-models</code>. Each lab pulls its own models into that shared volume; each model is downloaded only once and remains available when you switch labs.</p>
 <p><a href="../course/data/contextual-retrieval-solution.zip">Download contextual-retrieval-solution.zip</a></p>
 <p>Extract the ZIP and open a terminal in the <code>contextual-retrieval-solution</code> folder. On systems that use <code>python3</code>, substitute it for <code>python</code> below.</p>
 <p><strong>Windows PowerShell:</strong></p>
@@ -94,7 +94,7 @@ python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </sp
 sh<span class="w"> </span>setup.sh
 </code></pre></div>
 
-<p>Setup starts PostgreSQL with pgvector and Ollama, then downloads <code>all-minilm:22m</code> for embeddings and <code>qwen2.5:0.5b</code> for context, reranking, and answers. PostgreSQL is published at <code>127.0.0.1:55432</code> and Ollama at <code>127.0.0.1:11435</code>. The Python client uses these IPv4 addresses too, avoiding possible <code>localhost</code> IPv6 delays. The database credentials <code>lab</code> / <code>lab</code> are only for this local exercise.</p>
+<p>Setup starts PostgreSQL with pgvector and Ollama, then downloads <code>all-minilm:22m</code> for embeddings and <code>qwen3:1.7b</code> for context, reranking, and answers. The MCP lab uses the same Ollama image, shared model volume, and Qwen3 model, so that model is downloaded only once across the two labs. PostgreSQL is published at <code>127.0.0.1:55432</code> and Ollama at <code>127.0.0.1:11435</code>. The Python client uses these IPv4 addresses too, avoiding possible <code>localhost</code> IPv6 delays. The database credentials <code>lab</code> / <code>lab</code> are only for this local exercise.</p>
 <p>Check that the services and models are ready:</p>
 <div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>ps
 docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>list
@@ -110,7 +110,7 @@ docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">ex
 </code></pre></div>
 
 <p>After loading a model, check its <code>PROCESSOR</code> column for CPU/GPU allocation:</p>
-<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>run<span class="w"> </span>qwen2.5:0.5b<span class="w"> </span><span class="s2">&quot;Say hello in one sentence.&quot;</span>
+<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>run<span class="w"> </span>qwen3:1.7b<span class="w"> </span><span class="s2">&quot;Say hello in one sentence.&quot;</span>
 docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>ps
 </code></pre></div>
 
@@ -210,18 +210,18 @@ python<span class="w"> </span>lab.py<span class="w"> </span>--impl<span class="w
 </ol>
 <h2 id="troubleshooting-and-cleanup">Troubleshooting and cleanup</h2>
 <ul>
-<li>For a stronger local language model, run <code>docker compose exec ollama ollama pull qwen2.5:1.5b</code>, then set <code>LAB_CHAT_MODEL</code> to <code>qwen2.5:1.5b</code> (<code>$env:LAB_CHAT_MODEL='qwen2.5:1.5b'</code> in PowerShell or <code>export LAB_CHAT_MODEL=qwen2.5:1.5b</code> in macOS/Linux). Rerun ingestion to regenerate context. Larger models need more memory and time. The embedding model is fixed at 384 dimensions; replacing it requires a compatible schema and re-ingestion.</li>
+<li>For a stronger local language model, run <code>docker compose exec ollama ollama pull qwen3:4b</code>, then set <code>LAB_CHAT_MODEL</code> to <code>qwen3:4b</code> (<code>$env:LAB_CHAT_MODEL='qwen3:4b'</code> in PowerShell or <code>export LAB_CHAT_MODEL=qwen3:4b</code> in macOS/Linux). Rerun ingestion to regenerate context. The 4B model needs more memory and time. The embedding model is fixed at 384 dimensions; replacing it requires a compatible schema and re-ingestion.</li>
 <li>If a port is already occupied, inspect <code>docker ps</code>, then stop or reconfigure the conflicting service, or change the host port in <code>compose.yaml</code> and the matching <code>LAB_DATABASE_URL</code> or <code>LAB_OLLAMA_URL</code>. Use <code>127.0.0.1</code> for IPv4 loopback when setting those URLs.</li>
 <li>For service or model errors, check <code>docker compose ps</code>, <code>docker compose logs db</code>, and <code>docker compose logs ollama</code>; ensure Docker Desktop is running and rerun setup if models are missing.</li>
 <li>If reranking reports that the model returned no 0–10 score, retry or use the larger local model above; the tiny model does not always follow the scoring prompt.</li>
 <li>If you change the source document, context prompt, or splitting behavior, rerun ingestion. Paragraph or document ID changes may also require updating <code>data/evaluation.json</code>.</li>
-<li>Stop the lab containers with <code>docker compose down</code>. Named volumes retain the database and downloaded models. <code>docker compose down -v</code> also deletes those volumes and requires downloading the models again.</li>
+<li>Stop the lab containers with <code>docker compose down</code>. This lab's database volume and the shared Ollama model volume are retained. <code>docker compose down -v</code> also deletes those volumes, including models used by both labs, so they must be downloaded again.</li>
 </ul>
 <h2 id="references">References</h2>
 <ul>
 <li><a href="https://www.anthropic.com/research/contextual-retrieval">Anthropic: Introducing Contextual Retrieval</a></li>
 <li><a href="https://github.com/pgvector/pgvector">pgvector</a></li>
-<li><a href="https://ollama.com/library/all-minilm">Ollama all-minilm</a> and <a href="https://ollama.com/library/qwen2.5">Qwen 2.5</a></li>
+<li><a href="https://ollama.com/library/all-minilm">Ollama all-minilm</a> and <a href="https://ollama.com/library/qwen3">Qwen3</a></li>
 </ul>
 	</article>
 	<script src="https://byui-cse.github.io/cse455-course/shared/lib/highlight/highlight.pack.js"></script>

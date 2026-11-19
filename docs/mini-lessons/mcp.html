@@ -29,7 +29,9 @@
         <div id="contents-wrapper">
             <div class="toc">
 <ul>
-<li><a href="#lab-build-an-mcp-campus-resource-finder">Lab: Build an MCP Campus Resource Finder</a><ul>
+<li><a href="#model-context-protocol">Model Context Protocol</a></li>
+<li><a href="#mcp-architecture">MCP Architecture</a></li>
+<li><a href="#lab-build-an-mcp-campus-resource-finder">Lab: Build an MCP Campus Resource Finder</a></li>
 <li><a href="#goal">Goal</a></li>
 <li><a href="#what-you-will-see">What you will see</a></li>
 <li><a href="#files">Files</a></li>
@@ -50,8 +52,6 @@
 <li><a href="#troubleshooting-and-cleanup">Troubleshooting and cleanup</a></li>
 <li><a href="#source-pages-used-for-the-sample-directory">Source pages used for the sample directory</a></li>
 </ul>
-</li>
-</ul>
 </div>
 
             <a href="#" id="hide-contents" title="Close Table of Contents"><i class="far fa-window-close"></i></a>
@@ -67,7 +67,20 @@
         <a href="#" id="show-contents" title="Show Table of Contents"><i class="far fa-list-alt"></i></a>
     </header>
 	<article>
-		<h1 id="lab-build-an-mcp-campus-resource-finder">Lab: Build an MCP Campus Resource Finder</h1>
+		<h2 id="model-context-protocol">Model Context Protocol</h2>
+<blockquote>
+<p>Model Context Protocol (MCP), a new standard for connecting AI assistants to the systems where data lives, including content repositories, business tools, and development environments.</p>
+</blockquote>
+<p><img alt="MCP Infographic" src="https://byui-cse.github.io/cse455-course/shared/img/mcp.webp" /></p>
+<h2 id="mcp-architecture">MCP Architecture</h2>
+<ul>
+<li><strong>MCP Hosts</strong>: Programs like Claude Desktop, IDEs, or your python application that want to access data through MCP</li>
+<li><strong>MCP Clients</strong>: Protocol clients that maintain 1:1 connections with servers</li>
+<li><strong>MCP Servers</strong>: Lightweight programs that each expose specific capabilities through the standardized Model Context Protocol (tools, resources, prompts)</li>
+<li><strong>Local Data Sources</strong>: Your computer's files, databases, and services that MCP servers can securely access</li>
+<li><strong>Remote Services</strong>: External systems available over the internet (e.g., through APIs) that MCP servers can connect to</li>
+</ul>
+<h2 id="lab-build-an-mcp-campus-resource-finder">Lab: Build an MCP Campus Resource Finder</h2>
 <h2 id="goal">Goal</h2>
 <p>Build a local assistant that can find BYU-Idaho student services and City of Rexburg information. You will inspect two small source-linked directories, expose two search functions as MCP tools, connect a client to the MCP server, and let a local language model choose which tool to call. The model runs in Ollama; no API key is needed.</p>
 <p>The directories are teaching snapshots compiled from official BYU-Idaho and City of Rexburg pages. Contact information, policies, eligibility, locations, and hours can change. Each entry links to its source; check the official page before relying on details.</p>
@@ -103,6 +116,10 @@
 
 <p><img alt="MCP sequence diagram" src="sequence-diagram-mcp.png" /></p>
 <p>The MCP server and client use <strong>stdio</strong>: the client starts the server as a child process and exchanges protocol messages through its input and output streams. Ollama runs in Docker and is reached through a local port. MCP standardizes how the client discovers and calls the server's tool; Ollama handles the separate decision about whether that tool is useful for a question.</p>
+<div class="admonition note">
+<p class="admonition-title">Another transport option</p>
+<p>MCP also supports <a href="https://modelcontextprotocol.io/specification/2025-03-26/basic/transports">Streamable HTTP</a>, introduced in the March 2025 protocol revision. It uses an HTTP endpoint for client-server communication and can run statefully or statelessly. It supersedes the older HTTP+SSE transport and is the recommended choice for remote deployments. Stdio remains a good fit for local integrations like this lab, where the client launches the server.</p>
+</div>
 <h2 id="files">Files</h2>
 <table>
 <thead>
@@ -143,15 +160,19 @@
 </tbody>
 </table>
 <h2 id="set-up">Set up</h2>
-<p>Install Python 3.11 or newer and Docker Desktop (Windows or macOS) or Docker Engine (Linux). The model download is about 2.5 GB, in addition to container and Python dependencies. Allow Docker enough memory for a 4B parameter model; CPU inference works but may be slow.</p>
+<p>Install Python 3.11 or newer and Docker Desktop (Windows or macOS) or Docker Engine (Linux). The Qwen3 1.7B model download is about 1.4 GB, in addition to container and Python dependencies. CPU inference works but may be slow.</p>
 <p><a href="../course/data/mcp-campus-resources-lab.zip">Download mcp-campus-resources-lab.zip</a></p>
 <p>Open a terminal in <code>mcp-campus-resources</code>.</p>
-<p>Both this lab and <code>week-4/contextual-retrieval-local</code> now use the Docker volume <code>genai-accelerator-ollama-models</code>. Models downloaded in either lab are available to the other, and <code>ollama pull</code> skips models already present. If this is your first setup, continue below. If you already installed an earlier version and want to reuse its downloaded models, copy its old volume into the shared volume <strong>before</strong> starting the updated Compose setup or running <code>ollama pull</code>. First list existing volumes with <code>docker volume ls</code>, then run the command for each old volume you want to keep:</p>
-<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>mcp-campus-resources_ollama_models:/source:ro<span class="w"> </span>-v<span class="w"> </span>genai-accelerator-ollama-models:/destination<span class="w"> </span>alpine:3.21<span class="w"> </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;cp -a /source/. /destination/&quot;</span>
+<p>Both this lab and the Contextual Retrieval lab now use the Docker image <code>ollama/ollama:0.12.11</code> and the volume <code>cse455-ollama-models</code>. Models downloaded in either lab are available to the other, and <code>ollama pull</code> skips models already present. The labs use different language models, so each model still needs to be downloaded once. If this is your first setup, continue below. If you already installed an earlier version and want to reuse its downloaded models, copy its old volume into the shared volume <strong>before</strong> starting the updated Compose setup or running <code>ollama pull</code>. First list existing volumes with <code>docker volume ls</code>, then run the command matching the old volume you want to keep:</p>
+<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>mcp-campus-resources_ollama_models:/source:ro<span class="w"> </span>-v<span class="w"> </span>cse455-ollama-models:/destination<span class="w"> </span>alpine:3.21<span class="w"> </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;cp -a /source/. /destination/&quot;</span>
 </code></pre></div>
 
 <p>For an earlier Week 4 install, use its previous volume name instead:</p>
-<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>contextual-retrieval-local_contextual_models:/source:ro<span class="w"> </span>-v<span class="w"> </span>genai-accelerator-ollama-models:/destination<span class="w"> </span>alpine:3.21<span class="w"> </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;cp -a /source/. /destination/&quot;</span>
+<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>contextual-retrieval-local_contextual_models:/source:ro<span class="w"> </span>-v<span class="w"> </span>cse455-ollama-models:/destination<span class="w"> </span>alpine:3.21<span class="w"> </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;cp -a /source/. /destination/&quot;</span>
+</code></pre></div>
+
+<p>For an earlier install of the downloadable Contextual Retrieval solution, use:</p>
+<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>contextual-retrieval-solution_contextual_models:/source:ro<span class="w"> </span>-v<span class="w"> </span>cse455-ollama-models:/destination<span class="w"> </span>alpine:3.21<span class="w"> </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;cp -a /source/. /destination/&quot;</span>
 </code></pre></div>
 
 <p>If you customized a Compose project name, substitute the actual old volume name shown by <code>docker volume ls</code>. Keep old volumes until you confirm the shared one works.</p>
@@ -160,7 +181,7 @@
 <span class="p">.\.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">Activate</span><span class="p">.</span><span class="n">ps1</span>
 <span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">-r</span> <span class="n">requirements</span><span class="p">.</span><span class="n">txt</span>
 <span class="n">docker</span> <span class="n">compose</span> <span class="n">up</span> <span class="n">-d</span>
-<span class="n">docker</span> <span class="n">compose</span> <span class="n">exec</span> <span class="n">ollama</span> <span class="n">ollama</span> <span class="n">pull</span> <span class="n">qwen3</span><span class="p">:</span><span class="n">4b</span>
+<span class="n">docker</span> <span class="n">compose</span> <span class="n">exec</span> <span class="n">ollama</span> <span class="n">ollama</span> <span class="n">pull</span> <span class="n">qwen3</span><span class="p">:</span><span class="n">1</span><span class="p">.</span><span class="n">7b</span>
 </code></pre></div>
 
 <p>If PowerShell blocks environment activation, use <code>\.venv\Scripts\python.exe</code> in place of <code>python</code> in the remaining Python commands.</p>
@@ -169,11 +190,11 @@
 <span class="nb">source</span><span class="w"> </span>.venv/bin/activate
 python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
 docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
-docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>pull<span class="w"> </span>qwen3:4b
+docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>pull<span class="w"> </span>qwen3:1.7b
 </code></pre></div>
 
-<p>The container publishes Ollama only on <code>127.0.0.1:11435</code>; the Python client uses that same address.</p>
-<p>To stop Ollama after working, run <code>docker compose down</code> from the lab folder. This stops and removes that lab's container while keeping the shared models on the machine. Start the other lab when you are ready to switch; only run one lab's Ollama container at a time because both use port <code>11435</code> and the same model store. Docker also keeps the downloaded container image cached. Avoid <code>docker compose down -v</code>: it deletes the shared model volume, so both labs will need to download their models again.</p>
+<p>The container publishes Ollama only on <code>127.0.0.1:11435</code>; the Python client uses that same address. Both downloadable labs use this port and the shared model volume. Run only one lab's Ollama container at a time. Docker reuses the same Ollama image, while the shared volume keeps each lab's downloaded models available. Avoid <code>docker compose down -v</code>: it deletes the shared model volume, so both labs will need to download their models again.</p>
+<p>To stop Ollama after working, run <code>docker compose down</code> from the lab folder. This stops and removes that lab's container while keeping the shared models on the machine. Start the other lab when you are ready to switch.</p>
 <p>Confirm that the model is available:</p>
 <div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>list
 </code></pre></div>
@@ -186,7 +207,7 @@ docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">ex
 
 <p>Compose may recreate the Ollama container to apply the GPU setting. The named model volume is retained. Both CPU and GPU modes use the same local address and port. To switch back to CPU mode, run <code>docker compose up -d</code>. When starting Ollama manually after selecting GPU mode, include both files in the command each time; starting with only <code>compose.yaml</code> can recreate it without GPU access.</p>
 <p>To check whether Ollama is using the GPU, load the model and inspect its processor allocation while it is still loaded:</p>
-<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>compose.yaml<span class="w"> </span>-f<span class="w"> </span>compose.gpu.yaml<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>run<span class="w"> </span>qwen3:4b<span class="w"> </span><span class="s2">&quot;Say hello in one sentence.&quot;</span>
+<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>compose.yaml<span class="w"> </span>-f<span class="w"> </span>compose.gpu.yaml<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>run<span class="w"> </span>qwen3:1.7b<span class="w"> </span><span class="s2">&quot;Say hello in one sentence.&quot;</span>
 docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>compose.yaml<span class="w"> </span>-f<span class="w"> </span>compose.gpu.yaml<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>ps
 </code></pre></div>
 
@@ -260,7 +281,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> 
 <h2 id="troubleshooting-and-cleanup">Troubleshooting and cleanup</h2>
 <ul>
 <li><strong>Connection refused:</strong> Check <code>docker compose ps</code>, then start the container with <code>docker compose up -d</code>.</li>
-<li><strong>Model not found:</strong> Run <code>docker compose exec ollama ollama pull qwen3:4b</code>.</li>
+<li><strong>Model not found:</strong> Run <code>docker compose exec ollama ollama pull qwen3:1.7b</code>.</li>
 <li><strong>Slow answers:</strong> The first prompt can be slower while the model loads. CPU generation can be slow; give the command time to finish.</li>
 <li><strong>Server messages corrupt the protocol:</strong> MCP stdio uses stdout for protocol messages. Keep debug <code>print()</code> calls out of <code>server.py</code>; write diagnostics to stderr instead.</li>
 <li><strong>Resource details look stale:</strong> Follow the entry's <code>source_url</code> and refresh the JSON from the official page.</li>

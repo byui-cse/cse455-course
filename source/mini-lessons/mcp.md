@@ -2,7 +2,21 @@
 title: Mini Lesson: Model Context Protocol
 body-class: index-page
 ---
-# Lab: Build an MCP Campus Resource Finder
+## Model Context Protocol
+
+> Model Context Protocol (MCP), a new standard for connecting AI assistants to the systems where data lives, including content repositories, business tools, and development environments.
+
+![MCP Infographic]({{URLROOT}}/shared/img/mcp.webp)
+
+## MCP Architecture
+
+- **MCP Hosts**: Programs like Claude Desktop, IDEs, or your python application that want to access data through MCP
+- **MCP Clients**: Protocol clients that maintain 1:1 connections with servers
+- **MCP Servers**: Lightweight programs that each expose specific capabilities through the standardized Model Context Protocol (tools, resources, prompts)
+- **Local Data Sources**: Your computer's files, databases, and services that MCP servers can securely access
+- **Remote Services**: External systems available over the internet (e.g., through APIs) that MCP servers can connect to
+
+## Lab: Build an MCP Campus Resource Finder
 
 ## Goal
 
@@ -43,6 +57,10 @@ sequenceDiagram
 
 The MCP server and client use **stdio**: the client starts the server as a child process and exchanges protocol messages through its input and output streams. Ollama runs in Docker and is reached through a local port. MCP standardizes how the client discovers and calls the server's tool; Ollama handles the separate decision about whether that tool is useful for a question.
 
+!!! note "Another transport option"
+
+    MCP also supports [Streamable HTTP](https://modelcontextprotocol.io/specification/2025-03-26/basic/transports), introduced in the March 2025 protocol revision. It uses an HTTP endpoint for client-server communication and can run statefully or statelessly. It supersedes the older HTTP+SSE transport and is the recommended choice for remote deployments. Stdio remains a good fit for local integrations like this lab, where the client launches the server.
+
 ## Files
 
 | File | Purpose |
@@ -57,22 +75,28 @@ The MCP server and client use **stdio**: the client starts the server as a child
 
 ## Set up
 
-Install Python 3.11 or newer and Docker Desktop (Windows or macOS) or Docker Engine (Linux). The model download is about 2.5 GB, in addition to container and Python dependencies. Allow Docker enough memory for a 4B parameter model; CPU inference works but may be slow.
+Install Python 3.11 or newer and Docker Desktop (Windows or macOS) or Docker Engine (Linux). The Qwen3 1.7B model download is about 1.4 GB, in addition to container and Python dependencies. CPU inference works but may be slow.
 
 [Download mcp-campus-resources-lab.zip](../course/data/mcp-campus-resources-lab.zip)
 
 Open a terminal in `mcp-campus-resources`.
 
-Both this lab and `week-4/contextual-retrieval-local` now use the Docker volume `genai-accelerator-ollama-models`. Models downloaded in either lab are available to the other, and `ollama pull` skips models already present. If this is your first setup, continue below. If you already installed an earlier version and want to reuse its downloaded models, copy its old volume into the shared volume **before** starting the updated Compose setup or running `ollama pull`. First list existing volumes with `docker volume ls`, then run the command for each old volume you want to keep:
+Both this lab and the Contextual Retrieval lab now use the Docker image `ollama/ollama:0.12.11` and the volume `cse455-ollama-models`. Models downloaded in either lab are available to the other, and `ollama pull` skips models already present. The labs use different language models, so each model still needs to be downloaded once. If this is your first setup, continue below. If you already installed an earlier version and want to reuse its downloaded models, copy its old volume into the shared volume **before** starting the updated Compose setup or running `ollama pull`. First list existing volumes with `docker volume ls`, then run the command matching the old volume you want to keep:
 
 ```bash
-docker run --rm -v mcp-campus-resources_ollama_models:/source:ro -v genai-accelerator-ollama-models:/destination alpine:3.21 sh -c "cp -a /source/. /destination/"
+docker run --rm -v mcp-campus-resources_ollama_models:/source:ro -v cse455-ollama-models:/destination alpine:3.21 sh -c "cp -a /source/. /destination/"
 ```
 
 For an earlier Week 4 install, use its previous volume name instead:
 
 ```bash
-docker run --rm -v contextual-retrieval-local_contextual_models:/source:ro -v genai-accelerator-ollama-models:/destination alpine:3.21 sh -c "cp -a /source/. /destination/"
+docker run --rm -v contextual-retrieval-local_contextual_models:/source:ro -v cse455-ollama-models:/destination alpine:3.21 sh -c "cp -a /source/. /destination/"
+```
+
+For an earlier install of the downloadable Contextual Retrieval solution, use:
+
+```bash
+docker run --rm -v contextual-retrieval-solution_contextual_models:/source:ro -v cse455-ollama-models:/destination alpine:3.21 sh -c "cp -a /source/. /destination/"
 ```
 
 If you customized a Compose project name, substitute the actual old volume name shown by `docker volume ls`. Keep old volumes until you confirm the shared one works.
@@ -84,7 +108,7 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 docker compose up -d
-docker compose exec ollama ollama pull qwen3:4b
+docker compose exec ollama ollama pull qwen3:1.7b
 ```
 
 If PowerShell blocks environment activation, use `\.venv\Scripts\python.exe` in place of `python` in the remaining Python commands.
@@ -96,12 +120,12 @@ python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
 docker compose up -d
-docker compose exec ollama ollama pull qwen3:4b
+docker compose exec ollama ollama pull qwen3:1.7b
 ```
 
-The container publishes Ollama only on `127.0.0.1:11435`; the Python client uses that same address.
+The container publishes Ollama only on `127.0.0.1:11435`; the Python client uses that same address. Both downloadable labs use this port and the shared model volume. Run only one lab's Ollama container at a time. Docker reuses the same Ollama image, while the shared volume keeps each lab's downloaded models available. Avoid `docker compose down -v`: it deletes the shared model volume, so both labs will need to download their models again.
 
-To stop Ollama after working, run `docker compose down` from the lab folder. This stops and removes that lab's container while keeping the shared models on the machine. Start the other lab when you are ready to switch; only run one lab's Ollama container at a time because both use port `11435` and the same model store. Docker also keeps the downloaded container image cached. Avoid `docker compose down -v`: it deletes the shared model volume, so both labs will need to download their models again.
+To stop Ollama after working, run `docker compose down` from the lab folder. This stops and removes that lab's container while keeping the shared models on the machine. Start the other lab when you are ready to switch.
 
 Confirm that the model is available:
 
@@ -124,7 +148,7 @@ Compose may recreate the Ollama container to apply the GPU setting. The named mo
 To check whether Ollama is using the GPU, load the model and inspect its processor allocation while it is still loaded:
 
 ```bash
-docker compose -f compose.yaml -f compose.gpu.yaml exec ollama ollama run qwen3:4b "Say hello in one sentence."
+docker compose -f compose.yaml -f compose.gpu.yaml exec ollama ollama run qwen3:1.7b "Say hello in one sentence."
 docker compose -f compose.yaml -f compose.gpu.yaml exec ollama ollama ps
 ```
 
@@ -219,7 +243,7 @@ For each change, ask the tool directly through a sample question and check the o
 ## Troubleshooting and cleanup
 
 - **Connection refused:** Check `docker compose ps`, then start the container with `docker compose up -d`.
-- **Model not found:** Run `docker compose exec ollama ollama pull qwen3:4b`.
+- **Model not found:** Run `docker compose exec ollama ollama pull qwen3:1.7b`.
 - **Slow answers:** The first prompt can be slower while the model loads. CPU generation can be slow; give the command time to finish.
 - **Server messages corrupt the protocol:** MCP stdio uses stdout for protocol messages. Keep debug `print()` calls out of `server.py`; write diagnostics to stderr instead.
 - **Resource details look stale:** Follow the entry's `source_url` and refresh the JSON from the official page.
