@@ -23,6 +23,8 @@ You do not need to write Python to complete the walkthrough. Each `lab.py` comma
 
 Install Python 3.11–3.13 and Docker Desktop with Linux containers. Start Docker Desktop and wait until its engine is running. Allow several GB of disk space for images, models, and Python packages. Internet access is required for the initial downloads; subsequent inference and retrieval run locally.
 
+[Download contextual-retrieval-solution.zip](../course/data/contextual-retrieval-solution.zip)
+
 Extract the ZIP and open a terminal in the `contextual-retrieval-solution` folder. On systems that use `python3`, substitute it for `python` below.
 
 **Windows PowerShell:**
@@ -78,8 +80,6 @@ docker compose exec ollama ollama ps
 The model may disappear from `ollama ps` after it is unloaded; run the first command again if the list is empty. To use the GPU override when starting containers manually, use `docker compose -f compose.yaml -f compose.gpu.yaml up -d --wait`. To switch back to CPU mode, rerun setup without the GPU option. The named volumes retain the database and models when a container is recreated.
 
 ## 2. Explore and split the documents
-
-[Download contextual-retrieval-solution.zip](../course/data/contextual-retrieval-solution.zip)
 
 
 Open `data/field-guides.md`. This one file contains four fictional field guides, each beginning with a heading such as `# aurora-v1 | Aurora Sensor, version 1 field guide`. Each paragraph becomes one chunk.
